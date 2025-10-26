@@ -90,6 +90,17 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
 
+    // Validar domínio do email
+    if (!email.endsWith('@yooga.com.br')) {
+      toast({ 
+        title: "Email inválido", 
+        description: "Apenas emails do domínio @yooga.com.br são permitidos", 
+        variant: "destructive" 
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
