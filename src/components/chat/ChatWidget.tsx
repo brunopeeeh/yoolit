@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { LogIn } from "lucide-react";
+import { LogIn, LogInIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
@@ -39,33 +40,31 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
     setMessages([]);
   };
 
-  if (!user) {
-    return (
-      <Card className="max-w-md mx-auto p-12 text-center">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 mb-6 mx-auto">
-          <LogIn className="h-8 w-8" />
-        </div>
-        <h2 className="text-2xl font-semibold mb-2">Bem-vindo ao Maya Chat</h2>
-        <p className="text-muted-foreground mb-6">
-          Por favor, faça login para enviar mensagens
-        </p>
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-          <p className="text-sm text-amber-800 dark:text-amber-300">
-            <LogIn className="inline h-4 w-4 mr-1" />
-            Por favor, faça login para enviar mensagens
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col max-w-6xl mx-auto">
       {/* Messages */}
       <ChatMessages messages={messages} isTyping={isTyping} />
 
+      {/* Login Alert (when not logged in) */}
+      {!user && (
+        <div className="border-t bg-background p-6">
+          <div className="max-w-4xl mx-auto mb-4">
+            <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800">
+              <LogInIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-amber-800 dark:text-amber-300">
+                Por favor, faça login para enviar mensagens
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      )}
+
       {/* Input */}
-      <ChatInput onSendMessage={handleSendMessage} onClear={handleClearChat} />
+      <ChatInput 
+        onSendMessage={handleSendMessage} 
+        onClear={handleClearChat}
+        disabled={!user}
+      />
     </div>
   );
 };

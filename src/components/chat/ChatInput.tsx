@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
   onClear?: () => void;
+  disabled?: boolean;
 }
 
-const ChatInput = ({ onSendMessage, onClear }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, onClear, disabled = false }: ChatInputProps) => {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,8 +34,9 @@ const ChatInput = ({ onSendMessage, onClear }: ChatInputProps) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Digite sua mensagem..."
+          placeholder={disabled ? "Faça login para enviar mensagens" : "Digite sua mensagem..."}
           className="flex-1"
+          disabled={disabled}
         />
         {onClear && (
           <Button
@@ -42,6 +44,7 @@ const ChatInput = ({ onSendMessage, onClear }: ChatInputProps) => {
             size="icon"
             variant="outline"
             onClick={onClear}
+            disabled={disabled}
             className="h-10 w-10 rounded-full bg-red-50 border-red-200 hover:bg-red-100 text-red-600 dark:bg-red-950 dark:border-red-800 dark:hover:bg-red-900 dark:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
@@ -50,7 +53,7 @@ const ChatInput = ({ onSendMessage, onClear }: ChatInputProps) => {
         <Button
           type="submit"
           size="icon"
-          disabled={!input.trim()}
+          disabled={!input.trim() || disabled}
           className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           <Send className="h-4 w-4" />
