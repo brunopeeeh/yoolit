@@ -17,6 +17,7 @@ const Header = ({ user, profile, onUserChange }: HeaderProps) => {
     <header className="bg-gradient-to-r from-[#4A9FBD] to-[#2E7D9B] text-white py-4 px-6 shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <h1 className="text-2xl font-bold">Maya</h1>
+        <p>Utilize Maya e tenha auxilio nos atendimentos! 😇</p>
         
         <LoginPopover
           user={user}

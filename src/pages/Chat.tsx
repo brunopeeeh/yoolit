@@ -32,6 +32,32 @@ const Chat = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Listen for profile changes in real-time
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const profileSubscription = supabase
+      .channel('profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Profile updated:', payload.new);
+          setProfile(payload.new);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profileSubscription);
+    };
+  }, [user?.id]);
+
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
@@ -47,7 +73,7 @@ const Chat = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header user={user} profile={profile} onUserChange={setUser} />
-      <ChatWidget user={user} />
+      <ChatWidget user={user} profile={profile} />
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { renderTextWithLinks } from "@/lib/linkUtils";
+import CredentialsCopyButton from "./CredentialsCopyButton";
 
 interface Message {
   id: string;
@@ -42,13 +44,30 @@ const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
           >
             <div
               className={cn(
-                "max-w-[80%] rounded-lg px-4 py-2",
                 message.sender === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? ""
+                  : "bg-muted max-w-[80%] rounded-lg px-4 py-2"
               )}
+              style={
+                message.sender === "user"
+                  ? {
+                      background: "linear-gradient(135deg, #115883 0%, #001723 100%)",
+                      color: "white",
+                      padding: "12px 16px",
+                      borderRadius: "18px 18px 4px 18px",
+                      maxWidth: "80%",
+                      wordWrap: "break-word",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)"
+                    }
+                  : undefined
+              }
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <p className="text-sm whitespace-pre-wrap">
+                {renderTextWithLinks(message.content)}
+              </p>
+              {message.sender === "bot" && (
+                <CredentialsCopyButton content={message.content} />
+              )}
               <p className="text-xs opacity-70 mt-1">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>

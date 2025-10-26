@@ -130,7 +130,7 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
     if (error) {
       toast({ title: "Erro ao atualizar status", description: error.message, variant: "destructive" });
     } else {
-      setLocalProfile({ ...localProfile, status: newStatus });
+      // Remove setLocalProfile since real-time updates will handle this
       const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
       toast({ title: `Status alterado para: ${statusLabel}` });
     }
