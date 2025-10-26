@@ -1,44 +1,21 @@
-import { useState, useEffect } from "react";
-import { MessageSquare, Maximize2, Minimize2 } from "lucide-react";
+import { useState } from "react";
+import { MessageSquare, Maximize2, Minimize2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import StatusSelector from "./StatusSelector";
-import ChatAuth from "./ChatAuth";
 import { cn } from "@/lib/utils";
 
 interface ChatWidgetProps {
-  onUserChange?: (user: any) => void;
+  user: any;
 }
 
-const ChatWidget = ({ onUserChange }: ChatWidgetProps) => {
+const ChatWidget = ({ user }: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      setUser(userData);
-      onUserChange?.(userData);
-    }
-  }, [onUserChange]);
-
-  const handleAuthSuccess = (userData: any) => {
-    setUser(userData);
-    onUserChange?.(userData);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    setUser(null);
-    setMessages([]);
-    onUserChange?.(null);
-  };
 
   const handleSendMessage = async (content: string) => {
     const userMessage = {
@@ -64,6 +41,26 @@ const ChatWidget = ({ onUserChange }: ChatWidgetProps) => {
     }, 1500);
   };
 
+  if (!user) {
+    return (
+      <Card className="max-w-md mx-auto p-12 text-center">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 mb-6 mx-auto">
+          <LogIn className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-semibold mb-2">Bem-vindo ao Maya Chat</h2>
+        <p className="text-muted-foreground mb-6">
+          Por favor, faça login para enviar mensagens
+        </p>
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            <LogIn className="inline h-4 w-4 mr-1" />
+            Por favor, faça login para enviar mensagens
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   if (!isOpen) {
     return (
       <Button
@@ -86,58 +83,44 @@ const ChatWidget = ({ onUserChange }: ChatWidgetProps) => {
       )}
     >
       <div className="flex h-full flex-col">
-        {!user ? (
-          <ChatAuth onAuthSuccess={handleAuthSuccess} />
-        ) : (
-          <>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
-                  {user.name[0]}
-                </div>
-                <div>
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <StatusSelector userId={user.id} currentStatus={user.status} />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                >
-                  {isFullscreen ? (
-                    <Minimize2 className="h-4 w-4" />
-                  ) : (
-                    <Maximize2 className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleLogout}
-                  title="Logout"
-                >
-                  ⎋
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setIsOpen(false)}
-                >
-                  ×
-                </Button>
-              </div>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b p-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+              {user.name[0]}
             </div>
+            <div>
+              <h3 className="font-semibold">{user.name}</h3>
+              <StatusSelector userId={user.id} currentStatus={user.status} />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsOpen(false)}
+            >
+              ×
+            </Button>
+          </div>
+        </div>
 
-            {/* Messages */}
-            <ChatMessages messages={messages} isTyping={isTyping} />
+        {/* Messages */}
+        <ChatMessages messages={messages} isTyping={isTyping} />
 
-            {/* Input */}
-            <ChatInput onSendMessage={handleSendMessage} />
-          </>
-        )}
+        {/* Input */}
+        <ChatInput onSendMessage={handleSendMessage} />
       </div>
     </Card>
   );
