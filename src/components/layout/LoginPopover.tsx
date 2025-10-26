@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import {
   Moon,
   Sun,
@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,18 +40,24 @@ const statuses = [
 ];
 
 interface LoginPopoverProps {
-  user: any;
-  onUserChange: (user: any) => void;
+  user: User | null;
+  profile: any;
+  onUserChange: (user: User | null) => void;
   children: ReactNode;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: LoginPopoverProps) => {
+const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenChange }: LoginPopoverProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const [localProfile, setLocalProfile] = useState(profile);
+
+  useEffect(() => {
+    setLocalProfile(profile);
+  }, [profile]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,17 +67,18 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const foundUser = users.find((u: any) => u.email === email && u.password === password);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (foundUser) {
-      localStorage.setItem("currentUser", JSON.stringify(foundUser));
+    if (error) {
+      toast({ title: "Credenciais inválidas", description: error.message, variant: "destructive" });
+    } else {
       toast({ title: "Login realizado com sucesso!" });
-      onUserChange(foundUser);
+      onUserChange(data.user);
       onOpenChange(false);
       setShowSignup(false);
-    } else {
-      toast({ title: "Credenciais inválidas", variant: "destructive" });
     }
     
     setIsLoading(false);
@@ -84,58 +93,58 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    
-    if (users.find((u: any) => u.email === email)) {
-      toast({ title: "Email já cadastrado", variant: "destructive" });
-      setIsLoading(false);
-      return;
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      name,
-      status: "available",
-      createdAt: new Date().toISOString()
-    };
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          name,
+        }
+      }
+    });
 
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("currentUser", JSON.stringify(newUser));
+    if (error) {
+      toast({ title: "Erro ao criar conta", description: error.message, variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Conta criada com sucesso!", 
+        description: "Verifique seu email para confirmar a conta."
+      });
+      onUserChange(data.user);
+      onOpenChange(false);
+      setShowSignup(false);
+    }
     
-    toast({ title: "Conta criada com sucesso!" });
-    onUserChange(newUser);
-    onOpenChange(false);
-    setShowSignup(false);
     setIsLoading(false);
   };
 
-  const handleStatusChange = (newStatus: string) => {
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = users.map((u: any) =>
-      u.id === user.id ? { ...u, status: newStatus } : u
-    );
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    
-    const updatedUser = { ...user, status: newStatus };
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-    onUserChange(updatedUser);
-    
-    const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
-    toast({ title: `Status alterado para: ${statusLabel}` });
+  const handleStatusChange = async (newStatus: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: newStatus })
+      .eq("id", user.id);
+
+    if (error) {
+      toast({ title: "Erro ao atualizar status", description: error.message, variant: "destructive" });
+    } else {
+      setLocalProfile({ ...localProfile, status: newStatus });
+      const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
+      toast({ title: `Status alterado para: ${statusLabel}` });
+    }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     onUserChange(null);
     onOpenChange(false);
     toast({ title: "Logout realizado" });
   };
 
-  if (user) {
-    const currentStatusObj = statuses.find((s) => s.value === user.status) || statuses[6];
+  if (user && localProfile) {
+    const currentStatusObj = statuses.find((s) => s.value === localProfile.status) || statuses[6];
     const CurrentStatusIcon = currentStatusObj.icon;
 
     return (
@@ -150,11 +159,11 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
                 className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
                 style={{ backgroundColor: currentStatusObj.color }}
               >
-                {user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                {localProfile.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U"}
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-base">{user.name}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="font-semibold text-base">{localProfile.name || "Usuário"}</p>
+                <p className="text-xs text-muted-foreground">{localProfile.email || user.email}</p>
               </div>
             </div>
 
@@ -166,7 +175,7 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
                 <div className="space-y-1">
                   {statuses.map((status) => {
                     const StatusIcon = status.icon;
-                    const isSelected = user.status === status.value;
+                    const isSelected = localProfile.status === status.value;
                     return (
                       <button
                         key={status.value}

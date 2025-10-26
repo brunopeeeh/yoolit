@@ -1,14 +1,16 @@
-import { User } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPopover from "./LoginPopover";
 import { useState } from "react";
+import type { User } from "@supabase/supabase-js";
 
 interface HeaderProps {
-  user: any;
-  onUserChange: (user: any) => void;
+  user: User | null;
+  profile: any;
+  onUserChange: (user: User | null) => void;
 }
 
-const Header = ({ user, onUserChange }: HeaderProps) => {
+const Header = ({ user, profile, onUserChange }: HeaderProps) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   return (
@@ -18,6 +20,7 @@ const Header = ({ user, onUserChange }: HeaderProps) => {
         
         <LoginPopover
           user={user}
+          profile={profile}
           onUserChange={onUserChange}
           isOpen={isLoginOpen}
           onOpenChange={setIsLoginOpen}
@@ -27,7 +30,7 @@ const Header = ({ user, onUserChange }: HeaderProps) => {
             variant="ghost"
             className="h-10 w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
           >
-            <User className="h-5 w-5" />
+            <UserIcon className="h-5 w-5" />
           </Button>
         </LoginPopover>
       </div>
