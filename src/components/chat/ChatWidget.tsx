@@ -6,26 +6,24 @@ import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import StatusSelector from "./StatusSelector";
 import { cn } from "@/lib/utils";
-
 interface ChatWidgetProps {
   user: any;
 }
-
-const ChatWidget = ({ user }: ChatWidgetProps) => {
+const ChatWidget = ({
+  user
+}: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-
   const handleSendMessage = async (content: string) => {
     const userMessage = {
       id: Date.now().toString(),
       content,
       sender: "user",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
-
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
 
     // Simulate bot response (replace with actual N8N webhook call)
@@ -34,16 +32,14 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
         id: (Date.now() + 1).toString(),
         content: "Thank you for your message! I'm processing your request.",
         sender: "bot",
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
     }, 1500);
   };
-
   if (!user) {
-    return (
-      <Card className="max-w-md mx-auto p-12 text-center">
+    return <Card className="max-w-md mx-auto p-12 text-center">
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 mb-6 mx-auto">
           <LogIn className="h-8 w-8" />
         </div>
@@ -57,31 +53,12 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
             Por favor, faça login para enviar mensagens
           </p>
         </div>
-      </Card>
-    );
+      </Card>;
   }
-
   if (!isOpen) {
-    return (
-      <Button
-        size="icon"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
-        onClick={() => setIsOpen(true)}
-      >
-        <MessageSquare className="h-6 w-6" />
-      </Button>
-    );
+    return;
   }
-
-  return (
-    <Card
-      className={cn(
-        "fixed shadow-2xl transition-all duration-300",
-        isFullscreen
-          ? "inset-0 rounded-none"
-          : "bottom-6 right-6 h-[600px] w-[400px] rounded-lg"
-      )}
-    >
+  return <Card className={cn("fixed shadow-2xl transition-all duration-300", isFullscreen ? "inset-0 rounded-none" : "bottom-6 right-6 h-[600px] w-[400px] rounded-lg")}>
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
@@ -95,22 +72,10 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="h-4 w-4" />
-              ) : (
-                <Maximize2 className="h-4 w-4" />
-              )}
+            <Button size="icon" variant="ghost" onClick={() => setIsFullscreen(!isFullscreen)}>
+              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsOpen(false)}
-            >
+            <Button size="icon" variant="ghost" onClick={() => setIsOpen(false)}>
               ×
             </Button>
           </div>
@@ -122,8 +87,6 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
         {/* Input */}
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ChatWidget;
