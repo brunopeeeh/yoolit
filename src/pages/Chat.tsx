@@ -13,12 +13,9 @@ const Chat = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header user={user} onUserChange={setUser} />
-      
-      <div className="p-8">
-        <ChatWidget user={user} />
-      </div>
+      <ChatWidget user={user} />
     </div>
   );
 };
