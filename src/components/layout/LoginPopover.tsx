@@ -1,4 +1,4 @@
-import { useState, ReactNode, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import {
   Moon,
   Sun,
@@ -43,21 +43,18 @@ interface LoginPopoverProps {
   user: User | null;
   profile: any;
   onUserChange: (user: User | null) => void;
+  onProfileChange?: (profile: any) => void;
   children: ReactNode;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenChange }: LoginPopoverProps) => {
+const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, isOpen, onOpenChange }: LoginPopoverProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const [localProfile, setLocalProfile] = useState(profile);
-
-  useEffect(() => {
-    setLocalProfile(profile);
-  }, [profile]);
+  // Use profile directly from props for real-time updates
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,15 +119,24 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
   const handleStatusChange = async (newStatus: string) => {
     if (!user) return;
 
-    const { error } = await supabase
+    console.log('Updating status to:', newStatus);
+
+    const { data, error } = await supabase
       .from("profiles")
       .update({ status: newStatus })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select()
+      .single();
 
     if (error) {
+      console.error('Error updating status:', error);
       toast({ title: "Erro ao atualizar status", description: error.message, variant: "destructive" });
     } else {
-      // Remove setLocalProfile since real-time updates will handle this
+      console.log('Status updated successfully:', data);
+      // Notify parent component about the profile change
+      if (onProfileChange && data) {
+        onProfileChange(data);
+      }
       const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
       toast({ title: `Status alterado para: ${statusLabel}` });
     }
@@ -143,8 +149,8 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
     toast({ title: "Logout realizado" });
   };
 
-  if (user && localProfile) {
-    const currentStatusObj = statuses.find((s) => s.value === localProfile.status) || statuses[6];
+  if (user && profile) {
+    const currentStatusObj = statuses.find((s) => s.value === profile.status) || statuses[6];
     const CurrentStatusIcon = currentStatusObj.icon;
 
     return (
@@ -159,11 +165,11 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
                 className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
                 style={{ backgroundColor: currentStatusObj.color }}
               >
-                {localProfile.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U"}
+                {profile.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U"}
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-base">{localProfile.name || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground">{localProfile.email || user.email}</p>
+                <p className="font-semibold text-base">{profile.name || "Usuário"}</p>
+                <p className="text-xs text-muted-foreground">{profile.email || user.email}</p>
               </div>
             </div>
 
@@ -175,7 +181,7 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
                 <div className="space-y-1">
                   {statuses.map((status) => {
                     const StatusIcon = status.icon;
-                    const isSelected = localProfile.status === status.value;
+                    const isSelected = profile.status === status.value;
                     return (
                       <button
                         key={status.value}
@@ -270,7 +276,7 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
               </div>
               <Button
                 type="submit"
-                className="w-full bg-[#4169E1] hover:bg-[#3457C0] text-white"
+                className="w-full bg-[#83cef6] hover:bg-[#62a3d6] text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
@@ -279,7 +285,7 @@ const LoginPopover = ({ user, profile, onUserChange, children, isOpen, onOpenCha
               <button
                 type="button"
                 onClick={() => setShowSignup(true)}
-                className="w-full text-sm text-[#4169E1] hover:underline"
+                className="w-full text-sm text-[#0a639a] hover:underline"
               >
                 Não tem conta? Criar uma agora
               </button>

@@ -36,6 +36,8 @@ const Chat = () => {
   useEffect(() => {
     if (!user?.id) return;
 
+    console.log('Setting up profile subscription for user:', user.id);
+
     const profileSubscription = supabase
       .channel('profile-changes')
       .on(
@@ -47,13 +49,16 @@ const Chat = () => {
           filter: `id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Profile updated:', payload.new);
+          console.log('Profile updated via real-time:', payload.new);
           setProfile(payload.new);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
+      console.log('Removing profile subscription');
       supabase.removeChannel(profileSubscription);
     };
   }, [user?.id]);
@@ -70,9 +75,19 @@ const Chat = () => {
     }
   };
 
+  const handleProfileChange = (updatedProfile: any) => {
+    console.log('Profile changed via callback:', updatedProfile);
+    setProfile(updatedProfile);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header user={user} profile={profile} onUserChange={setUser} />
+      <Header 
+        user={user} 
+        profile={profile} 
+        onUserChange={setUser} 
+        onProfileChange={handleProfileChange}
+      />
       <ChatWidget user={user} profile={profile} />
     </div>
   );

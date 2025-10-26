@@ -30,7 +30,7 @@ const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
       <div className="space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
-            <p>Start a conversation with Maya</p>
+            <p>Olá! Como posso ajudá-lo hoje?</p>
           </div>
         )}
         
