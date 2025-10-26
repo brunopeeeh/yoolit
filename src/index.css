@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,6 +57,57 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+@layer utilities {
+  .shadow-main-ui {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Formatação melhorada para listas */
+  .formatted-list ul {
+    @apply list-disc list-inside mb-4 space-y-2;
+  }
+
+  .formatted-list ol {
+    @apply list-decimal list-inside mb-4 space-y-2;
+  }
+
+  .formatted-list li {
+    @apply leading-7;
+  }
+
+  /* Formatação para tabelas */
+  .formatted-table {
+    @apply w-full border-collapse border border-gray-300 mb-4;
+  }
+
+  .formatted-table th {
+    @apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold;
+  }
+
+  .formatted-table td {
+    @apply border border-gray-300 px-4 py-2;
+  }
+
+  /* Formatação para citações */
+  .formatted-blockquote {
+    @apply border-l-4 border-blue-500 pl-4 py-2 mb-4 bg-blue-50 italic;
+  }
+
+  /* Espaçamento consistente */
+  .formatted-content > * + * {
+    @apply mt-4;
+  }
+
+  /* Formatação para mensagens */
+  .message-content {
+    @apply space-y-3 leading-relaxed;
+  }
+
+  .message-content p:last-child {
+    @apply mb-0;
+  }
+}
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -94,12 +147,78 @@ All colors MUST be HSL.
   }
 }
 
+/* scrollbar */
+::-webkit-scrollbar {
+	@apply h-[4px] w-[4px];
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-gray-200;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply bg-primary;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	@apply bg-gray-600;
+}
+
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border border-solid;
   }
 
   body {
-    @apply bg-background text-foreground;
+    font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    @apply bg-background text-foreground antialiased leading-relaxed;
+  }
+
+  /* Melhor formatação para texto */
+  p {
+    @apply mb-4 leading-7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold mb-3 leading-tight;
+  }
+
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+  h4 { @apply text-lg; }
+
+  /* Formatação de código */
+  code {
+    @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+  }
+
+  pre {
+    @apply bg-gray-50 p-4 rounded-lg overflow-x-auto mb-4;
+  }
+
+  pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .thinking-text {
+    background: linear-gradient(90deg, #d946ef, #a855f7, #6366f1, #0ea5e9, #06b6d4);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: gradient 2s linear infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 }
