@@ -1,15 +1,41 @@
 import { useState, ReactNode } from "react";
-import { Moon, Sun } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  MessageSquare,
+  Users,
+  Coffee,
+  Clock,
+  Droplets,
+  ExternalLink,
+  CheckCircle,
+  XCircle,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+const statuses = [
+  { value: "feedback", label: "Feedback", icon: MessageSquare, color: "#3B82F6" },
+  { value: "meeting", label: "Reunião/Treinamento", icon: Users, color: "#8B5CF6" },
+  { value: "yooga", label: "Yooga Timer⭐", icon: Coffee, color: "#F59E0B" },
+  { value: "pause", label: "Pausa - Aprovada", icon: Clock, color: "#EAB308" },
+  { value: "water", label: "Água/Banheiro", icon: Droplets, color: "#06B6D4" },
+  { value: "external", label: "Demandas Externas", icon: ExternalLink, color: "#4338CA" },
+  { value: "available", label: "Disponível", icon: CheckCircle, color: "#10B981" },
+  { value: "unavailable", label: "Indisponível", icon: XCircle, color: "#EC4899" },
+];
 
 interface LoginPopoverProps {
   user: any;
@@ -86,6 +112,21 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
     setIsLoading(false);
   };
 
+  const handleStatusChange = (newStatus: string) => {
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const updatedUsers = users.map((u: any) =>
+      u.id === user.id ? { ...u, status: newStatus } : u
+    );
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    
+    const updatedUser = { ...user, status: newStatus };
+    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    onUserChange(updatedUser);
+    
+    const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
+    toast({ title: `Status alterado para: ${statusLabel}` });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     onUserChange(null);
@@ -94,43 +135,90 @@ const LoginPopover = ({ user, onUserChange, children, isOpen, onOpenChange }: Lo
   };
 
   if (user) {
+    const currentStatusObj = statuses.find((s) => s.value === user.status) || statuses[6];
+    const CurrentStatusIcon = currentStatusObj.icon;
+
     return (
       <Popover open={isOpen} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           {children}
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-4" align="end">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 pb-3 border-b">
-              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
-                {user.name[0]}
+        <PopoverContent className="w-80 p-0" align="end">
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div 
+                className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
+                style={{ backgroundColor: currentStatusObj.color }}
+              >
+                {user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
-              <div>
-                <p className="font-semibold">{user.name}</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div className="flex-1">
+                <p className="font-semibold text-base">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
             </div>
-            
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4 mr-2" />
-              ) : (
-                <Moon className="h-4 w-4 mr-2" />
-              )}
-              Modo {theme === "dark" ? "Claro" : "Escuro"}
-            </Button>
-            
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleLogout}
-            >
-              Sair
-            </Button>
+
+            <Separator className="mb-3" />
+
+            <div className="mb-3">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Status Atual</p>
+              <ScrollArea className="h-[240px] pr-3">
+                <div className="space-y-1">
+                  {statuses.map((status) => {
+                    const StatusIcon = status.icon;
+                    const isSelected = user.status === status.value;
+                    return (
+                      <button
+                        key={status.value}
+                        onClick={() => handleStatusChange(status.value)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left ${
+                          isSelected
+                            ? "bg-accent"
+                            : "hover:bg-accent/50"
+                        }`}
+                      >
+                        <StatusIcon
+                          className="h-4 w-4 flex-shrink-0"
+                          style={{ color: status.color }}
+                        />
+                        <span className="text-sm">{status.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <Separator className="my-3" />
+
+            <div className="space-y-1">
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+                <span className="text-sm">Modo Escuro</span>
+              </button>
+
+              <button
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">Configurações</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors text-left"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm">Sair</span>
+              </button>
+            </div>
           </div>
         </PopoverContent>
       </Popover>
