@@ -173,14 +173,14 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
           <div className="p-4">
             <div className="flex items-center gap-3 mb-4">
               <div 
-                className="h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-lg flex-shrink-0"
                 style={{ backgroundColor: currentStatusObj.color }}
               >
                 {profile.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U"}
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-base">{profile.name || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground">{profile.email || user.email}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm sm:text-base truncate">{profile.name || "Usuário"}</p>
+                <p className="text-xs text-muted-foreground truncate">{profile.email || user.email}</p>
               </div>
             </div>
 
@@ -188,7 +188,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
 
             <div className="mb-3">
               <p className="text-sm font-medium text-muted-foreground mb-2">Status Atual</p>
-              <ScrollArea className="h-[240px] pr-3">
+              <ScrollArea className="h-[200px] sm:h-[240px] pr-3">
                 <div className="space-y-1">
                   {statuses.map((status) => {
                     const StatusIcon = status.icon;
@@ -197,7 +197,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
                       <button
                         key={status.value}
                         onClick={() => handleStatusChange(status.value)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left ${
+                        className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-md transition-colors text-left ${
                           isSelected
                             ? "bg-accent"
                             : "hover:bg-accent/50"
@@ -207,7 +207,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
                           className="h-4 w-4 flex-shrink-0"
                           style={{ color: status.color }}
                         />
-                        <span className="text-sm">{status.label}</span>
+                        <span className="text-xs sm:text-sm truncate">{status.label}</span>
                       </button>
                     );
                   })}
@@ -220,29 +220,29 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
             <div className="space-y-1">
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
+                className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
               >
                 {theme === "dark" ? (
-                  <Sun className="h-4 w-4" />
+                  <Sun className="h-4 w-4 flex-shrink-0" />
                 ) : (
-                  <Moon className="h-4 w-4" />
+                  <Moon className="h-4 w-4 flex-shrink-0" />
                 )}
-                <span className="text-sm">Modo Escuro</span>
+                <span className="text-xs sm:text-sm">Modo Escuro</span>
               </button>
 
               <button
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
+                className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-md hover:bg-accent transition-colors text-left"
               >
-                <Settings className="h-4 w-4" />
-                <span className="text-sm">Configurações</span>
+                <Settings className="h-4 w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Configurações</span>
               </button>
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors text-left"
+                className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors text-left"
               >
-                <LogOut className="h-4 w-4" />
-                <span className="text-sm">Sair</span>
+                <LogOut className="h-4 w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-sm">Sair</span>
               </button>
             </div>
           </div>
@@ -256,9 +256,9 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-6">
+      <PopoverContent className="w-80 sm:w-96 p-0" align="end">
+        <div className="p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
             {showSignup ? "Criar Conta" : "Fazer Login"}
           </h2>
 
@@ -352,15 +352,15 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
             </form>
           )}
           
-          <div className="mt-6 pt-4 border-t">
+          <div className="mt-4 sm:mt-6 pt-4 border-t">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-full"
+              className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground w-full"
             >
               {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4 flex-shrink-0" />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Moon className="h-4 w-4 flex-shrink-0" />
               )}
               Modo Escuro
             </button>

@@ -81,14 +81,16 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <Header 
         user={user} 
         profile={profile} 
         onUserChange={setUser} 
         onProfileChange={handleProfileChange}
       />
-      <ChatWidget user={user} profile={profile} />
+      <div className="flex-1 overflow-hidden">
+        <ChatWidget user={user} profile={profile} />
+      </div>
     </div>
   );
 };

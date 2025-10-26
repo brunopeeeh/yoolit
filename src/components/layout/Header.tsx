@@ -43,11 +43,11 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
   
   const CurrentStatusIcon = currentStatusObj.icon;
   return (
-    <header className="bg-gradient-to-r from-[#4A9FBD] to-[#2E7D9B] text-white py-4 px-6 shadow-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Maya</h1>
-          <p>Utilize Maya e tenha auxilio nos atendimentos! 😇</p>
+    <header className="bg-gradient-to-r from-[#4A9FBD] to-[#2E7D9B] text-white py-2 px-4 sm:py-4 sm:px-6 shadow-lg">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-14 sm:h-16">
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <h1 className="text-sm sm:text-2xl font-bold truncate leading-none">Maya</h1>
+          <p className="text-xs sm:text-sm leading-none mt-1 sm:mt-1">Utilize Maya e tenha auxilio nos atendimentos! 😇</p>
         </div>
         
         <LoginPopover
@@ -58,20 +58,20 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
           isOpen={isLoginOpen}
           onOpenChange={setIsLoginOpen}
         >
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <Button
               size="icon"
               variant="ghost"
-              className="h-10 w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
             >
-              <UserIcon className="h-5 w-5" />
+              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             {user && profile && (
                  <div 
-                   className="absolute -bottom-1 -left-1 h-5 w-5 rounded-full flex items-center justify-center border-2 border-white"
+                   className="absolute -bottom-0.5 -left-0.5 sm:-bottom-1 sm:-left-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center border-2 border-white"
                    style={{ backgroundColor: currentStatusObj.color }}
                  >
-                   <CurrentStatusIcon className="h-3 w-3 text-white" />
+                   <CurrentStatusIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
                  </div>
                )}
           </div>
