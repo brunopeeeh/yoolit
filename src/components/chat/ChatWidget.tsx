@@ -1,21 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import StatusSelector from "./StatusSelector";
+import ChatAuth from "./ChatAuth";
 import { cn } from "@/lib/utils";
 
 interface ChatWidgetProps {
-  user: any;
+  onUserChange?: (user: any) => void;
 }
 
-const ChatWidget = ({ user }: ChatWidgetProps) => {
+const ChatWidget = ({ onUserChange }: ChatWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      setUser(userData);
+      onUserChange?.(userData);
+    }
+  }, [onUserChange]);
+
+  const handleAuthSuccess = (userData: any) => {
+    setUser(userData);
+    onUserChange?.(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    setUser(null);
+    setMessages([]);
+    onUserChange?.(null);
+  };
 
   const handleSendMessage = async (content: string) => {
     const userMessage = {
@@ -63,44 +86,58 @@ const ChatWidget = ({ user }: ChatWidgetProps) => {
       )}
     >
       <div className="flex h-full flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
-              {user.name[0]}
+        {!user ? (
+          <ChatAuth onAuthSuccess={handleAuthSuccess} />
+        ) : (
+          <>
+            {/* Header */}
+            <div className="flex items-center justify-between border-b p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                  {user.name[0]}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{user.name}</h3>
+                  <StatusSelector userId={user.id} currentStatus={user.status} />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  ⎋
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setIsOpen(false)}
+                >
+                  ×
+                </Button>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold">{user.name}</h3>
-              <StatusSelector userId={user.id} currentStatus={user.status} />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="h-4 w-4" />
-              ) : (
-                <Maximize2 className="h-4 w-4" />
-              )}
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsOpen(false)}
-            >
-              ×
-            </Button>
-          </div>
-        </div>
 
-        {/* Messages */}
-        <ChatMessages messages={messages} isTyping={isTyping} />
+            {/* Messages */}
+            <ChatMessages messages={messages} isTyping={isTyping} />
 
-        {/* Input */}
-        <ChatInput onSendMessage={handleSendMessage} />
+            {/* Input */}
+            <ChatInput onSendMessage={handleSendMessage} />
+          </>
+        )}
       </div>
     </Card>
   );
