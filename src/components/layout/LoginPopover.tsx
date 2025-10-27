@@ -117,7 +117,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
     } else {
       toast({ 
         title: "Conta criada com sucesso!", 
-        description: "Verifique seu email para confirmar a conta."
+        description: "Um e-mail de validação foi enviado para o seu endereço. Por favor, verifique sua caixa de entrada e clique no link de confirmação para ativar sua conta."
       });
       onUserChange(data.user);
       onOpenChange(false);
