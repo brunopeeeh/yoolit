@@ -1,4 +1,4 @@
-import { User as UserIcon, Settings } from "lucide-react";
+import { User as UserIcon, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPopover from "./LoginPopover";
 import { useState, useEffect } from "react";
@@ -81,7 +81,7 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
               onClick={() => navigate('/admin')}
               title="Painel Administrativo"
             >
-              <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           )}
           
