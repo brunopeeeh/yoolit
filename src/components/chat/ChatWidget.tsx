@@ -4,8 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
+import ProjectVersion from "./ProjectVersion";
 import { N8NClient } from "@/lib/n8n";
 import { useUser } from "@/hooks/useUser";
+import packageJson from "../../../package.json";
 
 interface ChatWidgetProps {
   user?: any;
@@ -114,6 +116,62 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
     setSessionId(crypto.randomUUID());
   };
 
+  const handleCommand = (command: string, args?: string[]) => {
+    switch (command.toLowerCase()) {
+      case 'version':
+        const versionMessage = {
+          id: crypto.randomUUID(),
+          content: `Versão do projeto: ${packageJson.version}`,
+          sender: 'system',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, versionMessage]);
+        break;
+        
+      case 'clear':
+        handleClearChat();
+        break;
+        
+      case 'help':
+        const helpMessage = {
+          id: crypto.randomUUID(),
+          content: `Comandos disponíveis:
+/version - Exibe a versão do projeto
+/clear - Limpa o histórico de mensagens
+/help - Exibe esta ajuda
+/status - Exibe informações do sistema`,
+          sender: 'system',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, helpMessage]);
+        break;
+        
+      case 'status':
+        const statusMessage = {
+          id: crypto.randomUUID(),
+          content: `Status do sistema:
+- Usuário logado: ${isLoggedIn ? 'Sim' : 'Não'}
+- Session ID: ${sessionId}
+- Total de mensagens: ${messages.length}
+- Versão: ${packageJson.version}`,
+          sender: 'system',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, statusMessage]);
+         break;
+         
+       default:
+         const unknownMessage = {
+           id: crypto.randomUUID(),
+           content: `Comando desconhecido: /${command}. Digite /help para ver os comandos disponíveis.`,
+           sender: 'system',
+           timestamp: new Date().toISOString(),
+         };
+         setMessages(prev => [...prev, unknownMessage]);
+         break;
+     }
+   };
+
   return (
     <div className="flex h-full flex-col max-w-6xl mx-auto px-2 sm:px-0">
       {/* Messages */}
@@ -137,8 +195,12 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
       <ChatInput 
         onSendMessage={handleSendMessage} 
         onClear={handleClearChat}
+        onCommand={handleCommand}
         disabled={!isLoggedIn}
       />
+      
+      {/* Project Version */}
+      <ProjectVersion />
     </div>
   );
 };

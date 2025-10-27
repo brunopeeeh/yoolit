@@ -7,15 +7,30 @@ interface ChatInputProps {
   onSendMessage: (content: string) => void;
   onClear?: () => void;
   disabled?: boolean;
+  onCommand?: (command: string, args?: string[]) => void;
 }
 
-const ChatInput = ({ onSendMessage, onClear, disabled = false }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, onClear, disabled = false, onCommand }: ChatInputProps) => {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      onSendMessage(input.trim());
+      const trimmedInput = input.trim();
+      
+      // Verificar se é um comando interno
+      if (trimmedInput.startsWith('/')) {
+        const parts = trimmedInput.slice(1).split(' ');
+        const command = parts[0];
+        const args = parts.slice(1);
+        
+        if (onCommand) {
+          onCommand(command, args);
+        }
+      } else {
+        onSendMessage(trimmedInput);
+      }
+      
       setInput("");
     }
   };
