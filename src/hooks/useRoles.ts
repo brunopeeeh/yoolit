@@ -13,6 +13,9 @@ export const useRoles = (userId?: string) => {
       return;
     }
 
+    // Ensure loading is true when starting a new fetch after userId becomes available
+    setIsLoading(true);
+
     const fetchRoles = async () => {
       try {
         console.log('Fetching roles for user:', userId);
