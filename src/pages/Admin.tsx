@@ -41,7 +41,15 @@ const Admin = () => {
   }, [localUser]);
 
   useEffect(() => {
+    console.log('Admin access check:', { 
+      localUser: localUser?.id, 
+      isAdmin, 
+      userLoading, 
+      rolesLoading 
+    });
+    
     if (!userLoading && !rolesLoading && (!localUser || !isAdmin)) {
+      console.log('Redirecting to home - no access');
       navigate('/');
     }
   }, [localUser, isAdmin, userLoading, rolesLoading, navigate]);
