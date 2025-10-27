@@ -1,8 +1,10 @@
-import { User as UserIcon } from "lucide-react";
+import { User as UserIcon, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPopover from "./LoginPopover";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import {
   MessageSquare,
   Users,
@@ -34,6 +36,26 @@ interface HeaderProps {
 
 const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (user) {
+      const checkAdmin = async () => {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .single();
+        setIsAdmin(!!data);
+      };
+      checkAdmin();
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   // Usar diretamente o profile prop em vez de estado local
   // para garantir que sempre reflita o estado mais atual
@@ -50,7 +72,20 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
           <p className="text-xs sm:text-sm leading-none mt-1 sm:mt-1">Utilize Maya e tenha auxilio nos atendimentos! 😇</p>
         </div>
         
-        <LoginPopover
+        <div className="flex items-center gap-2">
+          {isAdmin && location.pathname !== '/admin' && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
+              onClick={() => navigate('/admin')}
+              title="Painel Administrativo"
+            >
+              <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          )}
+          
+          <LoginPopover
           user={user}
           profile={profile}
           onUserChange={onUserChange}
@@ -58,24 +93,25 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
           isOpen={isLoginOpen}
           onOpenChange={setIsLoginOpen}
         >
-          <div className="relative flex-shrink-0">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
-            >
-              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            {user && profile && (
-                 <div 
-                   className="absolute -bottom-0.5 -left-0.5 sm:-bottom-1 sm:-left-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center border-2 border-white"
-                   style={{ backgroundColor: currentStatusObj.color }}
-                 >
-                   <CurrentStatusIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
-                 </div>
-               )}
-          </div>
-        </LoginPopover>
+            <div className="relative flex-shrink-0">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
+              >
+                <UserIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+              {user && profile && (
+                   <div 
+                     className="absolute -bottom-0.5 -left-0.5 sm:-bottom-1 sm:-left-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center border-2 border-white"
+                     style={{ backgroundColor: currentStatusObj.color }}
+                   >
+                     <CurrentStatusIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+                   </div>
+                 )}
+            </div>
+          </LoginPopover>
+        </div>
       </div>
     </header>
   );

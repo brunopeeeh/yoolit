@@ -44,6 +44,99 @@ export type Database = {
         }
         Relationships: []
       }
+      shifts: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          end_time: string | null
+          id: string
+          notes: string | null
+          shift_date: string
+          shift_type: string
+          start_time: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          shift_date: string
+          shift_type: string
+          start_time?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          shift_date?: string
+          shift_type?: string
+          start_time?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      status_changes: {
+        Row: {
+          changed_by: string
+          created_at: string | null
+          id: string
+          new_status: string
+          old_status: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string | null
+          id?: string
+          new_status: string
+          old_status?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string | null
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
