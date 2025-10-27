@@ -48,13 +48,14 @@ const Admin = () => {
       rolesLoading 
     });
     
-    if (!userLoading && !rolesLoading && (!localUser || !isAdmin)) {
+    // Só redireciona se tiver certeza que o loading terminou E o usuário não tem acesso
+    if (!userLoading && !rolesLoading && localUser && !isAdmin) {
       console.log('Redirecting to home - no access');
       navigate('/');
     }
   }, [localUser, isAdmin, userLoading, rolesLoading, navigate]);
 
-  if (userLoading || rolesLoading) {
+  if (userLoading || rolesLoading || !localUser) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center h-screen">
@@ -64,7 +65,7 @@ const Admin = () => {
     );
   }
 
-  if (!localUser || !isAdmin || !supabaseUser) {
+  if (!isAdmin || !supabaseUser) {
     return null;
   }
 
