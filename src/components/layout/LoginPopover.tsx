@@ -270,7 +270,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="daniel.braga@yooga.com.br"
+                  placeholder="suporte@yooga.com.br"
                   className="bg-muted/50"
                   required
                 />
