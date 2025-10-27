@@ -47,22 +47,64 @@ const CredentialsCopyButton = ({ content }: CredentialsCopyButtonProps) => {
     return null;
   }
 
-  const copyToClipboard = async (text: string, type: 'login' | 'password') => {
+  // Função para detectar se está rodando em iframe
+  const isInIframe = () => {
     try {
-      await navigator.clipboard.writeText(text);
-      
-      if (type === 'login') {
-        setCopiedLogin(true);
-        setTimeout(() => setCopiedLogin(false), 2000);
-      } else {
-        setCopiedPassword(true);
-        setTimeout(() => setCopiedPassword(false), 2000);
-      }
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  };
 
-      toast({
-        title: "Copiado!",
-        description: `${type === 'login' ? 'Login' : 'Senha'} copiado para a área de transferência`,
-      });
+  // Função fallback para copiar usando document.execCommand
+  const fallbackCopyToClipboard = (text: string): boolean => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const copyToClipboard = async (text: string, type: 'login' | 'password') => {
+    let success = false;
+    
+    try {
+      // Tenta usar a API moderna do clipboard primeiro
+      if (navigator.clipboard && navigator.clipboard.writeText && !isInIframe()) {
+        await navigator.clipboard.writeText(text);
+        success = true;
+      } else {
+        // Fallback para document.execCommand (funciona em iframes)
+        success = fallbackCopyToClipboard(text);
+      }
+      
+      if (success) {
+        if (type === 'login') {
+          setCopiedLogin(true);
+          setTimeout(() => setCopiedLogin(false), 2000);
+        } else {
+          setCopiedPassword(true);
+          setTimeout(() => setCopiedPassword(false), 2000);
+        }
+
+        toast({
+          title: "Copiado!",
+          description: `${type === 'login' ? 'Login' : 'Senha'} copiado para a área de transferência`,
+        });
+      } else {
+        throw new Error('Falha ao copiar');
+      }
     } catch (err) {
       toast({
         title: "Erro",
