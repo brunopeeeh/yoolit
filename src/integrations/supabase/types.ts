@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_schedules: {
+        Row: {
+          break_end_time: string | null
+          break_start_time: string | null
+          created_at: string
+          day_of_week: string
+          id: string
+          updated_at: string
+          user_id: string
+          work_end_time: string | null
+          work_start_time: string | null
+        }
+        Insert: {
+          break_end_time?: string | null
+          break_start_time?: string | null
+          created_at?: string
+          day_of_week: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          work_end_time?: string | null
+          work_start_time?: string | null
+        }
+        Update: {
+          break_end_time?: string | null
+          break_start_time?: string | null
+          created_at?: string
+          day_of_week?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          work_end_time?: string | null
+          work_start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_schedules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

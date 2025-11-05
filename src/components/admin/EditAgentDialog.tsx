@@ -64,6 +64,35 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
     setName(user.name);
     setEmail(user.email);
     setRolesChanged(false);
+    
+    // Load existing schedules
+    const loadSchedules = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('agent_schedules')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const loadedSchedules: WeekSchedule = {};
+          data.forEach((schedule: any) => {
+            loadedSchedules[schedule.day_of_week] = {
+              workStart: schedule.work_start_time || '',
+              workEnd: schedule.work_end_time || '',
+              breakStart: schedule.break_start_time || '',
+              breakEnd: schedule.break_end_time || '',
+            };
+          });
+          setSchedules(loadedSchedules);
+        }
+      } catch (error) {
+        console.error('Error loading schedules:', error);
+      }
+    };
+
+    loadSchedules();
   }, [user]);
 
   const handleScheduleChange = (field: keyof DaySchedule, value: string) => {
@@ -144,6 +173,39 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
     }
   };
 
+  const handleSaveSchedules = async () => {
+    try {
+      // Delete existing schedules for this user
+      const { error: deleteError } = await supabase
+        .from('agent_schedules')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      // Insert new schedules
+      const schedulesToInsert = Object.entries(schedules).map(([day, schedule]) => ({
+        user_id: user.id,
+        day_of_week: day,
+        work_start_time: schedule.workStart || null,
+        work_end_time: schedule.workEnd || null,
+        break_start_time: schedule.breakStart || null,
+        break_end_time: schedule.breakEnd || null,
+      }));
+
+      if (schedulesToInsert.length > 0) {
+        const { error: insertError } = await supabase
+          .from('agent_schedules')
+          .insert(schedulesToInsert);
+
+        if (insertError) throw insertError;
+      }
+    } catch (error) {
+      console.error('Error saving schedules:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -154,8 +216,8 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
         await handleSaveRoles();
       }
       
-      // Aqui você implementaria a lógica para salvar os horários
-      console.log('Schedules:', schedules);
+      // Salvar horários
+      await handleSaveSchedules();
       
       toast.success('Agente atualizado com sucesso!');
       onOpenChange(false);

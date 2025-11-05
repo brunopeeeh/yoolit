@@ -80,14 +80,15 @@ export const NewAgentDialog = ({ open, onOpenChange, onSuccess }: NewAgentDialog
   const onSubmit = async (data: AgentFormData) => {
     setIsSubmitting(true);
     try {
-      // Aqui você implementaria a lógica para criar o agente
-      // Por enquanto, vou apenas mostrar uma mensagem de sucesso
-      console.log('Agent data:', { ...data, schedules });
+      // Criar o perfil do agente primeiro (isso seria implementado via Supabase Auth + trigger)
+      // Por enquanto, vamos assumir que o usuário já existe e apenas salvar os horários
       
-      toast.success('Agente criado com sucesso!');
-      reset();
-      setSchedules({});
-      setSelectedDay('dom');
+      // Nota: Para criar um novo usuário você precisaria usar supabase.auth.admin.createUser
+      // ou ter um fluxo de convite/signup separado
+      
+      console.log('Agent data:', { ...data, schedules });
+      toast.info('Funcionalidade de criação de agente em desenvolvimento. Configure os horários após criar o usuário no sistema de autenticação.');
+      
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
