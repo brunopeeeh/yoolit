@@ -5,12 +5,10 @@ import Header from '@/components/layout/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { UserManagement } from '@/components/admin/UserManagement';
-import { ShiftManagement } from '@/components/admin/ShiftManagement';
 import { StatusHistory } from '@/components/admin/StatusHistory';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
 import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
-import { ShiftGenerator } from '@/components/admin/ShiftGenerator';
 import { AgentWeeklySchedule } from '@/components/admin/AgentWeeklySchedule';
 import { BarChart3, Shield, Calendar, History, RefreshCw, Users } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
@@ -156,19 +154,8 @@ const Admin = () => {
             <UserManagement />
           </TabsContent>
 
-          <TabsContent value="shifts" className="mt-6 space-y-6">
+          <TabsContent value="shifts" className="mt-6">
             <AgentWeeklySchedule />
-            
-            <div className="space-y-6 border-t pt-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Ferramentas de Geração de Turnos</h3>
-                <p className="text-sm text-muted-foreground">
-                  Use as ferramentas abaixo para gerar turnos específicos baseados nas escalas semanais configuradas acima.
-                </p>
-              </div>
-              <ShiftGenerator />
-              <ShiftManagement />
-            </div>
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
