@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus } from 'lucide-react';
 import { RoleDialog } from './RoleDialog';
+import { NewAgentDialog } from './NewAgentDialog';
 
 type Profile = {
   id: string;
@@ -20,6 +21,7 @@ export const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isNewAgentDialogOpen, setIsNewAgentDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchProfiles = async () => {
@@ -94,10 +96,21 @@ export const UserManagement = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Gerenciamento de Usuários</CardTitle>
-          <CardDescription>
-            Gerencie permissões e roles dos usuários do sistema
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Gerenciamento de Usuários</CardTitle>
+              <CardDescription>
+                Gerencie permissões e roles dos usuários do sistema
+              </CardDescription>
+            </div>
+            <Button
+              onClick={() => setIsNewAgentDialogOpen(true)}
+              className="bg-cyan-500 hover:bg-cyan-600"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Adicionar Agente
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -152,6 +165,12 @@ export const UserManagement = () => {
           onClose={handleDialogClose}
         />
       )}
+
+      <NewAgentDialog
+        open={isNewAgentDialogOpen}
+        onOpenChange={setIsNewAgentDialogOpen}
+        onSuccess={fetchProfiles}
+      />
     </>
   );
 };
