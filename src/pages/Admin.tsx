@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '@/hooks/useUser';
 import { useRoles } from '@/hooks/useRoles';
 import Header from '@/components/layout/Header';
@@ -19,8 +19,10 @@ const Admin = () => {
   const { user: localUser, isLoading: userLoading } = useUser();
   const { isAdmin, isLoading: rolesLoading } = useRoles(localUser?.id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
   const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const activeTab = searchParams.get('tab') || 'dashboard';
   const [dashboardData, setDashboardData] = useState({
     availableAgents: 6,
     totalAgents: 13,
@@ -104,7 +106,7 @@ const Admin = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5 max-w-[1000px]">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
