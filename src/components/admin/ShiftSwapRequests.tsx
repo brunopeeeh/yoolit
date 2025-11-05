@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { NewSwapRequestDialog } from './NewSwapRequestDialog';
 
 interface SwapRequest {
   id: string;
@@ -210,6 +211,7 @@ export const ShiftSwapRequests = () => {
   const [filterAgent, setFilterAgent] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'mine' | 'supervisor' | 'agent'>('pending');
   const [useMockData] = useState(true); // Para usar dados mockados
+  const [showNewDialog, setShowNewDialog] = useState(false);
 
   const mockRequests: SwapRequest[] = [
     {
@@ -329,14 +331,20 @@ export const ShiftSwapRequests = () => {
               <SelectItem value="all">Todos os agentes</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="bg-cyan-500 hover:bg-cyan-600">
+          <Button className="bg-cyan-500 hover:bg-cyan-600" onClick={() => setShowNewDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Solicitação
           </Button>
         </div>
       </div>
 
-      <Tabs 
+      <NewSwapRequestDialog 
+        open={showNewDialog} 
+        onOpenChange={setShowNewDialog}
+        onSuccess={fetchRequests}
+      />
+
+      <Tabs
         value={filterStatus} 
         onValueChange={(value) => setFilterStatus(value as typeof filterStatus)} 
         className="w-full"
