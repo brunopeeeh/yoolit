@@ -4,7 +4,7 @@ import LoginPopover from "./LoginPopover";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { useRoles } from "@/hooks/useRoles";
 import {
   MessageSquare,
   Users,
@@ -36,26 +36,16 @@ interface HeaderProps {
 
 const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
 
   useEffect(() => {
-    if (user) {
-      const checkAdmin = async () => {
-        const { data } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
-        setIsAdmin(!!data);
-      };
-      checkAdmin();
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user]);
+    console.log('Header - User:', user?.id);
+    console.log('Header - IsAdmin:', isAdmin);
+    console.log('Header - RolesLoading:', rolesLoading);
+    console.log('Header - Location:', location.pathname);
+  }, [user, isAdmin, rolesLoading, location]);
 
   // Usar diretamente o profile prop em vez de estado local
   // para garantir que sempre reflita o estado mais atual
