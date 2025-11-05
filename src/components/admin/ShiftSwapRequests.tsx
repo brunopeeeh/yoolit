@@ -210,79 +210,28 @@ export const ShiftSwapRequests = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgent, setFilterAgent] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'mine' | 'supervisor' | 'agent'>('pending');
-  const [useMockData] = useState(true); // Para usar dados mockados
   const [showNewDialog, setShowNewDialog] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const mockRequests: SwapRequest[] = [
-    {
-      id: '1',
-      created_at: '2025-05-15T10:00:00',
-      reason: 'Consulta médica',
-      status: 'pending',
-      payment_scheduled_for: '2025-05-23T20:00:00',
-      requester: { id: '1', name: 'Roberto Dias' },
-      target: { id: '2', name: 'Camila Rocha' },
-      requester_shift: { shift_date: '2025-05-15', start_time: '14:00', end_time: '20:00' },
-      target_shift: { shift_date: '2025-05-15', start_time: '20:00', end_time: '02:00' }
-    },
-    {
-      id: '2',
-      created_at: '2025-05-14T08:30:00',
-      reason: 'Compromisso familiar',
-      status: 'pending',
-      payment_scheduled_for: null,
-      requester: { id: '3', name: 'Juliana Lima' },
-      target: { id: '4', name: 'João Pereira' },
-      requester_shift: { shift_date: '2025-05-14', start_time: '14:00', end_time: '20:00' },
-      target_shift: { shift_date: '2025-05-14', start_time: '08:00', end_time: '14:00' }
-    },
-    {
-      id: '3',
-      created_at: '2025-05-13T15:20:00',
-      reason: 'Aula na faculdade',
-      status: 'approved',
-      payment_scheduled_for: '2025-05-20T14:00:00',
-      requester: { id: '5', name: 'Lucas Duarte' },
-      target: { id: '6', name: 'Mariana Silva' },
-      requester_shift: { shift_date: '2025-05-13', start_time: '08:00', end_time: '14:00' },
-      target_shift: { shift_date: '2025-05-13', start_time: '14:00', end_time: '20:00' }
-    },
-    {
-      id: '4',
-      created_at: '2025-05-12T11:00:00',
-      reason: 'Exame de rotina',
-      status: 'rejected',
-      payment_scheduled_for: null,
-      requester: { id: '7', name: 'Bruno Oliveira' },
-      target: { id: '8', name: 'Andrea Guarani' },
-      requester_shift: { shift_date: '2025-05-12', start_time: '20:00', end_time: '02:00' },
-      target_shift: { shift_date: '2025-05-12', start_time: '14:00', end_time: '20:00' }
-    }
-  ];
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    fetchCurrentUser();
+  }, []);
 
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
       
-      // Se usar dados mockados, filtrar localmente
-      if (useMockData) {
-        let filtered = mockRequests;
-        
-        if (filterStatus === 'mine') {
-          // Filtrar apenas as solicitações do usuário atual (exemplo)
-          filtered = filtered.filter(r => r.status === 'pending' || r.status === 'approved');
-        } else if (filterStatus === 'supervisor' || filterStatus === 'agent') {
-          // Para supervisor e agente, mostrar todas por enquanto
-          filtered = mockRequests;
-        } else if (filterStatus !== 'all') {
-          filtered = filtered.filter(r => r.status === filterStatus);
-        }
-        
-        setRequests(filtered);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         setIsLoading(false);
         return;
       }
 
+      // Buscar solicitações de troca com dados relacionados
       let query = supabase
         .from('shift_swap_requests')
         .select(`
@@ -291,21 +240,98 @@ export const ShiftSwapRequests = () => {
           reason,
           status,
           payment_scheduled_for,
-          requester:requester_id(id, name),
-          target:target_id(id, name),
-          requester_shift:requester_shift_id(shift_date, start_time, end_time),
-          target_shift:target_shift_id(shift_date, start_time, end_time)
+          requester_id,
+          target_id,
+          requester_shift_id,
+          target_shift_id
         `)
         .order('created_at', { ascending: false });
 
-      if (filterStatus !== 'all' && filterStatus !== 'mine' && filterStatus !== 'supervisor' && filterStatus !== 'agent') {
+      // Aplicar filtros baseados no status
+      if (filterStatus === 'mine') {
+        // Mostrar apenas solicitações onde o usuário é requester ou target
+        query = query.or(`requester_id.eq.${user.id},target_id.eq.${user.id}`);
+      } else if (filterStatus !== 'all' && filterStatus !== 'supervisor' && filterStatus !== 'agent') {
         query = query.eq('status', filterStatus);
       }
 
-      const { data, error } = await query;
+      const { data: swapRequests, error } = await query;
 
       if (error) throw error;
-      setRequests(data as any || []);
+
+      if (!swapRequests || swapRequests.length === 0) {
+        setRequests([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Buscar perfis dos usuários envolvidos
+      const userIds = new Set<string>();
+      swapRequests.forEach(req => {
+        userIds.add(req.requester_id);
+        userIds.add(req.target_id);
+      });
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .in('id', Array.from(userIds));
+
+      if (profilesError) throw profilesError;
+
+      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Buscar turnos
+      const shiftIds = new Set<string>();
+      swapRequests.forEach(req => {
+        shiftIds.add(req.requester_shift_id);
+        shiftIds.add(req.target_shift_id);
+      });
+
+      const { data: shifts, error: shiftsError } = await supabase
+        .from('shifts')
+        .select('id, shift_date, start_time, end_time')
+        .in('id', Array.from(shiftIds));
+
+      if (shiftsError) throw shiftsError;
+
+      const shiftsMap = new Map(shifts?.map(s => [s.id, s]) || []);
+
+      // Montar os dados completos
+      const completeRequests: SwapRequest[] = swapRequests.map(req => {
+        const requesterProfile = profilesMap.get(req.requester_id);
+        const targetProfile = profilesMap.get(req.target_id);
+        const requesterShift = shiftsMap.get(req.requester_shift_id);
+        const targetShift = shiftsMap.get(req.target_shift_id);
+
+        return {
+          id: req.id,
+          created_at: req.created_at,
+          reason: req.reason,
+          status: req.status,
+          payment_scheduled_for: req.payment_scheduled_for,
+          requester: {
+            id: req.requester_id,
+            name: requesterProfile?.name || 'Usuário desconhecido'
+          },
+          target: {
+            id: req.target_id,
+            name: targetProfile?.name || 'Usuário desconhecido'
+          },
+          requester_shift: {
+            shift_date: requesterShift?.shift_date || '',
+            start_time: requesterShift?.start_time || '',
+            end_time: requesterShift?.end_time || ''
+          },
+          target_shift: {
+            shift_date: targetShift?.shift_date || '',
+            start_time: targetShift?.start_time || '',
+            end_time: targetShift?.end_time || ''
+          }
+        };
+      });
+
+      setRequests(completeRequests);
     } catch (error) {
       console.error('Error fetching swap requests:', error);
       toast.error('Erro ao carregar solicitações');
