@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { STATUS_CONFIG, getStatusBgColor, getStatusLabel } from '@/lib/statusConfig';
 
 interface StatusChange {
   id: string;
@@ -21,21 +22,13 @@ interface AgentShift {
   statusHistory: StatusChange[];
 }
 
-const statusColors: Record<string, string> = {
-  available: 'bg-emerald-500',
-  busy: 'bg-rose-500',
-  away: 'bg-amber-500',
-  break: 'bg-amber-500',
-  offline: 'bg-slate-500',
-};
+const statusColors: Record<string, string> = Object.fromEntries(
+  STATUS_CONFIG.map(s => [s.value, s.bgColor])
+);
 
-const statusLabels: Record<string, string> = {
-  available: 'Disponível',
-  busy: 'Ocupado',
-  away: 'Ausente',
-  break: 'Pausa',
-  offline: 'Offline',
-};
+const statusLabels: Record<string, string> = Object.fromEntries(
+  STATUS_CONFIG.map(s => [s.value, s.label])
+);
 
 const timeToPosition = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -280,22 +273,38 @@ export const AgentScheduleChart = () => {
             )}
             <CurrentTimeLine />
           </div>
-          <div className="flex items-center gap-6 pt-4 border-t border-border">
+          <div className="flex items-center gap-4 pt-4 border-t border-border flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-blue-500" />
+              <span className="text-sm text-muted-foreground">Feedback</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-purple-500" />
+              <span className="text-sm text-muted-foreground">Reunião/Treinamento</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-amber-500" />
+              <span className="text-sm text-muted-foreground">Yooga Timer⭐</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-yellow-500" />
+              <span className="text-sm text-muted-foreground">Pausa - Aprovada</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-cyan-500" />
+              <span className="text-sm text-muted-foreground">Água/Banheiro</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-indigo-700" />
+              <span className="text-sm text-muted-foreground">Demandas Externas</span>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-emerald-500" />
               <span className="text-sm text-muted-foreground">Disponível</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-rose-500" />
-              <span className="text-sm text-muted-foreground">Ocupado</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-amber-500" />
-              <span className="text-sm text-muted-foreground">Ausente/Pausa</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-slate-500" />
-              <span className="text-sm text-muted-foreground">Offline</span>
+              <div className="w-4 h-4 rounded bg-pink-500" />
+              <span className="text-sm text-muted-foreground">Indisponível</span>
             </div>
           </div>
         </div>

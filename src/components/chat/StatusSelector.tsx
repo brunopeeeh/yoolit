@@ -1,15 +1,5 @@
 import { useState } from "react";
 import {
-  MessageSquare,
-  Users,
-  Coffee,
-  Clock,
-  Droplets,
-  ExternalLink,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -18,19 +8,12 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { STATUS_CONFIG, getStatusConfig } from "@/lib/statusConfig";
 
 interface StatusSelectorProps {
   userId: string;
   currentStatus: string;
 }
-
-const statuses = [
-  { value: "available", label: "Disponível", icon: CheckCircle, color: "text-emerald-500" },
-  { value: "busy", label: "Ocupado", icon: MessageSquare, color: "text-rose-500" },
-  { value: "away", label: "Ausente", icon: Clock, color: "text-amber-500" },
-  { value: "break", label: "Pausa", icon: Coffee, color: "text-amber-500" },
-  { value: "offline", label: "Offline", icon: XCircle, color: "text-slate-500" },
-];
 
 const StatusSelector = ({ userId, currentStatus }: StatusSelectorProps) => {
   const [status, setStatus] = useState(currentStatus);
@@ -82,7 +65,7 @@ const StatusSelector = ({ userId, currentStatus }: StatusSelectorProps) => {
     }
   };
 
-  const currentStatusObj = statuses.find((s) => s.value === status) || statuses[0];
+  const currentStatusObj = getStatusConfig(status);
   const Icon = currentStatusObj.icon;
 
   return (
@@ -90,18 +73,18 @@ const StatusSelector = ({ userId, currentStatus }: StatusSelectorProps) => {
       <SelectTrigger className="w-[180px] h-8 text-xs">
         <SelectValue>
           <div className="flex items-center gap-2">
-            <Icon className={`h-3 w-3 ${currentStatusObj.color}`} />
+            <Icon className={`h-3 w-3 ${currentStatusObj.textColor}`} />
             <span>{currentStatusObj.label}</span>
           </div>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {statuses.map((s) => {
+        {STATUS_CONFIG.map((s) => {
           const StatusIcon = s.icon;
           return (
             <SelectItem key={s.value} value={s.value}>
               <div className="flex items-center gap-2">
-                <StatusIcon className={`h-4 w-4 ${s.color}`} />
+                <StatusIcon className={`h-4 w-4 ${s.textColor}`} />
                 <span>{s.label}</span>
               </div>
             </SelectItem>

@@ -2,14 +2,6 @@ import { useState, useEffect, ReactNode } from "react";
 import {
   Moon,
   Sun,
-  MessageSquare,
-  Users,
-  Coffee,
-  Clock,
-  Droplets,
-  ExternalLink,
-  CheckCircle,
-  XCircle,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -27,17 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-const statuses = [
-  { value: "feedback", label: "Feedback", icon: MessageSquare, color: "#3B82F6" },
-  { value: "meeting", label: "Reunião/Treinamento", icon: Users, color: "#8B5CF6" },
-  { value: "yooga", label: "Yooga Timer⭐", icon: Coffee, color: "#F59E0B" },
-  { value: "pause", label: "Pausa - Aprovada", icon: Clock, color: "#EAB308" },
-  { value: "water", label: "Água/Banheiro", icon: Droplets, color: "#06B6D4" },
-  { value: "external", label: "Demandas Externas", icon: ExternalLink, color: "#4338CA" },
-  { value: "available", label: "Disponível", icon: CheckCircle, color: "#10B981" },
-  { value: "unavailable", label: "Indisponível", icon: XCircle, color: "#EC4899" },
-];
+import { STATUS_CONFIG, getStatusConfig } from "@/lib/statusConfig";
 
 interface LoginPopoverProps {
   user: User | null;
@@ -148,7 +130,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
       if (onProfileChange && data) {
         onProfileChange(data);
       }
-      const statusLabel = statuses.find((s) => s.value === newStatus)?.label;
+      const statusLabel = getStatusConfig(newStatus).label;
       toast({ title: `Status alterado para: ${statusLabel}` });
     }
   };
@@ -161,7 +143,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
   };
 
   if (user && profile) {
-    const currentStatusObj = statuses.find((s) => s.value === profile.status) || statuses[6];
+    const currentStatusObj = getStatusConfig(profile.status);
     const CurrentStatusIcon = currentStatusObj.icon;
 
     return (
@@ -174,7 +156,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
             <div className="flex items-center gap-3 mb-4">
               <div 
                 className="h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-lg flex-shrink-0"
-                style={{ backgroundColor: currentStatusObj.color }}
+                style={{ backgroundColor: currentStatusObj.hexColor }}
               >
                 {profile.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || "U"}
               </div>
@@ -190,7 +172,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               <p className="text-sm font-medium text-muted-foreground mb-2">Status Atual</p>
               <ScrollArea className="h-[200px] sm:h-[240px] pr-3">
                 <div className="space-y-1">
-                  {statuses.map((status) => {
+                  {STATUS_CONFIG.map((status) => {
                     const StatusIcon = status.icon;
                     const isSelected = profile.status === status.value;
                     return (
@@ -205,7 +187,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
                       >
                         <StatusIcon
                           className="h-4 w-4 flex-shrink-0"
-                          style={{ color: status.color }}
+                          style={{ color: status.hexColor }}
                         />
                         <span className="text-xs sm:text-sm truncate">{status.label}</span>
                       </button>
