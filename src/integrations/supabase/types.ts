@@ -274,6 +274,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_agents_for_swaps: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
+      list_future_shifts_for_swaps: {
+        Args: never
+        Returns: {
+          end_time: string
+          id: string
+          shift_date: string
+          shift_type: string
+          start_time: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "agent" | "supervisor"

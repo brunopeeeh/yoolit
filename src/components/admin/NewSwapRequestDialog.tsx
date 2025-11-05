@@ -72,15 +72,12 @@ export const NewSwapRequestDialog = ({
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('shifts')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('shift_date', new Date().toISOString().split('T')[0])
-        .order('shift_date', { ascending: true })
-        .limit(30);
+        .rpc('list_future_shifts_for_swaps');
 
       if (error) throw error;
-      setMyShifts(data || []);
+      
+      const myShifts = (data || []).filter((shift: any) => shift.user_id === user.id);
+      setMyShifts(myShifts);
     } catch (error) {
       console.error('Error fetching my shifts:', error);
       toast.error('Erro ao carregar seus turnos');
@@ -92,29 +89,27 @@ export const NewSwapRequestDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Buscar todos os usuários que não sejam o usuário atual
+      // Buscar todos os agentes
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .neq('id', user.id);
+        .rpc('list_agents_for_swaps');
 
       if (profilesError) throw profilesError;
 
-      // Buscar turnos futuros de cada agente
+      // Buscar turnos futuros
       const { data: shifts, error: shiftsError } = await supabase
-        .from('shifts')
-        .select('*')
-        .gte('shift_date', new Date().toISOString().split('T')[0])
-        .order('shift_date', { ascending: true });
+        .rpc('list_future_shifts_for_swaps');
 
       if (shiftsError) throw shiftsError;
 
-      // Combinar perfis com seus turnos
-      const agentsWithShifts = profiles?.map(profile => ({
-        id: profile.id,
-        name: profile.name || 'Sem nome',
-        shifts: shifts?.filter(shift => shift.user_id === profile.id) || []
-      })).filter(agent => agent.shifts.length > 0) || [];
+      // Combinar perfis com seus turnos (excluindo o usuário atual)
+      const agentsWithShifts = (profiles || [])
+        .filter((profile: any) => profile.id !== user.id)
+        .map((profile: any) => ({
+          id: profile.id,
+          name: profile.name || 'Sem nome',
+          shifts: (shifts || []).filter((shift: any) => shift.user_id === profile.id)
+        }))
+        .filter(agent => agent.shifts.length > 0);
 
       setAgents(agentsWithShifts);
     } catch (error) {
