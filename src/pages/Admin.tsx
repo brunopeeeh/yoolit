@@ -28,21 +28,6 @@ const Admin = () => {
     coverage: 95,
   });
 
-  const mockAgentShifts = [
-    { name: 'Andrea Guarani', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Bruno Oliveira', startTime: '06:00', endTime: '14:00', status: 'busy' as const },
-    { name: 'Caio Fernandes', startTime: '06:00', endTime: '14:00', status: 'busy' as const },
-    { name: 'Filipe de Oliveira Gramlich', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Herick Rodrigues', startTime: '06:00', endTime: '14:00', status: 'busy' as const },
-    { name: 'Julio Cesar Oliveira Monteiro', startTime: '06:00', endTime: '14:00', status: 'break' as const },
-    { name: 'Lucas Rocha', startTime: '06:00', endTime: '14:00', status: 'break' as const },
-    { name: 'Lucas Duarte', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Marlon Alves da Silva', startTime: '06:00', endTime: '14:00', status: 'offline' as const },
-    { name: 'Romério Barbosa de Oliveira Júnior', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Soha L', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Wagner Bustamante', startTime: '06:00', endTime: '14:00', status: 'available' as const },
-    { name: 'Wardney Martins Bolonha', startTime: '06:00', endTime: '14:00', status: 'busy' as const },
-  ];
 
   useEffect(() => {
     const getSession = async () => {
@@ -150,7 +135,7 @@ const Admin = () => {
               approvedSwaps={dashboardData.approvedSwaps}
               coverage={dashboardData.coverage}
             />
-            <AgentScheduleChart shifts={mockAgentShifts} />
+            <AgentScheduleChart />
           </TabsContent>
 
           <TabsContent value="swap-requests" className="mt-6">
