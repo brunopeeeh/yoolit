@@ -57,11 +57,13 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
   const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [rolesChanged, setRolesChanged] = useState(false);
 
   useEffect(() => {
     setSelectedRoles(user.roles);
     setName(user.name);
     setEmail(user.email);
+    setRolesChanged(false);
   }, [user]);
 
   const handleScheduleChange = (field: keyof DaySchedule, value: string) => {
@@ -84,6 +86,7 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
   };
 
   const handleRoleToggle = (role: string) => {
+    setRolesChanged(true);
     setSelectedRoles(prev =>
       prev.includes(role)
         ? prev.filter(r => r !== role)
@@ -145,7 +148,11 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
     setIsSubmitting(true);
     try {
       await handleSaveProfile();
-      await handleSaveRoles();
+      
+      // Só atualiza roles se foram modificadas
+      if (rolesChanged) {
+        await handleSaveRoles();
+      }
       
       // Aqui você implementaria a lógica para salvar os horários
       console.log('Schedules:', schedules);
