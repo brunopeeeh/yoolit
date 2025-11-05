@@ -16,12 +16,12 @@ import { BarChart3, Shield, Calendar, History, RefreshCw, Users } from 'lucide-r
 import type { User } from '@supabase/supabase-js';
 
 const Admin = () => {
-  const { user: localUser, isLoading: userLoading } = useUser();
-  const { isAdmin, isLoading: rolesLoading } = useRoles(localUser?.id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
-  const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
   const activeTab = searchParams.get('tab') || 'dashboard';
   const [dashboardData, setDashboardData] = useState({
     availableAgents: 6,
@@ -35,40 +35,41 @@ const Admin = () => {
   useEffect(() => {
     const getSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setSupabaseUser(user);
+      setUser(user);
+      setIsLoading(false);
     };
     getSession();
   }, []);
 
   useEffect(() => {
-    if (localUser) {
+    if (user) {
       const fetchProfile = async () => {
         const { data } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', localUser.id)
+          .eq('id', user.id)
           .single();
         setProfile(data);
       };
       fetchProfile();
     }
-  }, [localUser]);
+  }, [user]);
 
   useEffect(() => {
     console.log('Admin access check:', { 
-      localUser: localUser?.id, 
+      userId: user?.id, 
       isAdmin, 
-      userLoading, 
+      isLoading, 
       rolesLoading 
     });
     
     // Aguarda os loadings terminarem
-    if (userLoading || rolesLoading) {
+    if (isLoading || rolesLoading) {
       return;
     }
     
     // Se não há usuário após loading terminar, redireciona
-    if (!localUser) {
+    if (!user) {
       console.log('Redirecting to home - no user after loading');
       navigate('/');
       return;
@@ -79,10 +80,10 @@ const Admin = () => {
       console.log('Redirecting to home - user not admin');
       navigate('/');
     }
-  }, [localUser, isAdmin, userLoading, rolesLoading, navigate]);
+  }, [user, isAdmin, isLoading, rolesLoading, navigate]);
 
   // Mostra loading enquanto carrega
-  if (userLoading || rolesLoading) {
+  if (isLoading || rolesLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center h-screen">
@@ -93,14 +94,14 @@ const Admin = () => {
   }
 
   // Se não tem usuário ou não é admin, não renderiza nada (redirect acontece no useEffect)
-  if (!localUser || !isAdmin || !supabaseUser) {
+  if (!user || !isAdmin) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        user={supabaseUser} 
+        user={user} 
         profile={profile}
         onUserChange={() => {}}
         onProfileChange={setProfile}
