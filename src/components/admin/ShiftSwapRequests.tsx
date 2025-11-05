@@ -114,9 +114,9 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <h3 className="font-semibold">Solicitação #{request.id.substring(0, 8)}</h3>
+            <h3 className="font-semibold text-lg">Solicitação #{request.id.substring(0, 1)}</h3>
             <p className="text-sm text-muted-foreground">
               {format(new Date(request.created_at), "dd/MM/yyyy", { locale: ptBR })}
             </p>
@@ -126,56 +126,51 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
           </Badge>
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-sm">
-                {getInitials(request.requester.name)}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{request.requester.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatTime(request.requester_shift.start_time)} - {formatTime(request.requester_shift.end_time)}
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {getDayOfWeek(request.requester_shift.shift_date)}
-                </p>
-              </div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-background border-2 border-primary flex items-center justify-center font-bold text-sm">
+              {getInitials(request.requester.name)}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-sm">{request.requester.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {formatTime(request.requester_shift.start_time)} - {formatTime(request.requester_shift.end_time)}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {getDayOfWeek(request.requester_shift.shift_date)}
+              </p>
             </div>
           </div>
 
           <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
 
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center font-semibold text-sm">
-                {getInitials(request.target.name)}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{request.target.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatTime(request.target_shift.start_time)} - {formatTime(request.target_shift.end_time)}
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {getDayOfWeek(request.target_shift.shift_date)}
-                </p>
-              </div>
+          <div className="flex-1 flex items-center gap-3 justify-end">
+            <div className="flex-1 text-right">
+              <p className="font-medium text-sm">{request.target.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {formatTime(request.target_shift.start_time)} - {formatTime(request.target_shift.end_time)}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {getDayOfWeek(request.target_shift.shift_date)}
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-background border-2 border-secondary flex items-center justify-center font-bold text-sm">
+              {getInitials(request.target.name)}
             </div>
           </div>
         </div>
 
-        <div className="mb-4 space-y-1">
-          <p className="text-sm">
+        <div className="mb-6 space-y-2 text-sm">
+          <p>
             <span className="font-medium">Motivo:</span> {request.reason}
           </p>
-          {request.payment_scheduled_for && (
-            <p className="text-sm">
+          {request.payment_scheduled_for ? (
+            <p>
               <span className="font-medium">Pagamento:</span>{' '}
               {format(new Date(request.payment_scheduled_for), "dd/MM/yyyy (HH:mm - HH:mm)", { locale: ptBR })}
             </p>
-          )}
-          {!request.payment_scheduled_for && (
-            <p className="text-sm text-amber-600">
+          ) : (
+            <p className="text-amber-600">
               <span className="font-medium">Pagamento:</span> ⚠️ Em aberto
             </p>
           )}
@@ -190,16 +185,16 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
               onClick={handleReject}
               disabled={isUpdating}
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4 mr-2" />
               Recusar
             </Button>
             <Button
               size="sm"
-              className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+              className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
               onClick={handleApprove}
               disabled={isUpdating}
             >
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="h-4 w-4 mr-2" />
               Aprovar
             </Button>
           </div>
