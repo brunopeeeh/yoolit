@@ -11,6 +11,7 @@ import { StatusHistory } from '@/components/admin/StatusHistory';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
 import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
+import { ShiftGenerator } from '@/components/admin/ShiftGenerator';
 import { BarChart3, Shield, Calendar, History, RefreshCw, Users } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
@@ -146,7 +147,8 @@ const Admin = () => {
             <UserManagement />
           </TabsContent>
 
-          <TabsContent value="shifts" className="mt-6">
+          <TabsContent value="shifts" className="mt-6 space-y-6">
+            <ShiftGenerator />
             <ShiftManagement />
           </TabsContent>
 

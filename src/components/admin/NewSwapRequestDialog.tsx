@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { z } from 'zod';
 import { Calendar, Clock, User } from 'lucide-react';
+import { formatShiftType } from '@/lib/shiftUtils';
 
 interface Shift {
   id: string;
@@ -125,7 +126,8 @@ export const NewSwapRequestDialog = ({
   const formatShiftDisplay = (shift: Shift) => {
     const date = format(new Date(shift.shift_date), "dd/MM/yyyy (EEE)", { locale: ptBR });
     const time = `${shift.start_time.substring(0, 5)} - ${shift.end_time.substring(0, 5)}`;
-    return `${date} • ${time}`;
+    const shiftType = formatShiftType(shift.shift_type as 'morning' | 'afternoon' | 'night');
+    return `${date} • ${shiftType} • ${time}`;
   };
 
   const handleSubmit = async () => {
