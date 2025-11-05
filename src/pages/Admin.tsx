@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useUser } from '@/hooks/useUser';
 import { useRoles } from '@/hooks/useRoles';
 import Header from '@/components/layout/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -63,27 +62,15 @@ const Admin = () => {
       rolesLoading 
     });
     
-    // Aguarda os loadings terminarem
-    if (isLoading || rolesLoading) {
-      return;
-    }
-    
-    // Se não há usuário após loading terminar, redireciona
-    if (!user) {
-      console.log('Redirecting to home - no user after loading');
-      navigate('/');
-      return;
-    }
-    
-    // Se tem usuário mas não é admin, redireciona
-    if (!isAdmin) {
-      console.log('Redirecting to home - user not admin');
+    // Apenas redireciona se não houver usuário após loading
+    if (!isLoading && !user) {
+      console.log('Redirecting to home - no user');
       navigate('/');
     }
-  }, [user, isAdmin, isLoading, rolesLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
   // Mostra loading enquanto carrega
-  if (isLoading || rolesLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center h-screen">
@@ -93,8 +80,8 @@ const Admin = () => {
     );
   }
 
-  // Se não tem usuário ou não é admin, não renderiza nada (redirect acontece no useEffect)
-  if (!user || !isAdmin) {
+  // Se não tem usuário, não renderiza (redirect acontece no useEffect)
+  if (!user) {
     return null;
   }
 
