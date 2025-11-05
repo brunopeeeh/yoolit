@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface StatusSelectorProps {
   userId: string;
@@ -23,31 +25,60 @@ interface StatusSelectorProps {
 }
 
 const statuses = [
-  { value: "available", label: "Disponível", icon: CheckCircle, color: "text-green-500" },
-  { value: "feedback", label: "Feedback", icon: MessageSquare, color: "text-blue-500" },
-  { value: "meeting", label: "Reunião/Treinamento", icon: Users, color: "text-purple-500" },
-  { value: "yooga", label: "Yooga Timer⭐", icon: Coffee, color: "text-orange-500" },
-  { value: "pause", label: "Pausa - Aprovada", icon: Clock, color: "text-yellow-500" },
-  { value: "water", label: "Água/Banheiro", icon: Droplets, color: "text-cyan-500" },
-  { value: "external", label: "Demandas Externas", icon: ExternalLink, color: "text-indigo-500" },
-  { value: "unavailable", label: "Indisponível", icon: XCircle, color: "text-pink-500" },
+  { value: "available", label: "Disponível", icon: CheckCircle, color: "text-emerald-500" },
+  { value: "busy", label: "Ocupado", icon: MessageSquare, color: "text-rose-500" },
+  { value: "away", label: "Ausente", icon: Clock, color: "text-amber-500" },
+  { value: "break", label: "Pausa", icon: Coffee, color: "text-amber-500" },
+  { value: "offline", label: "Offline", icon: XCircle, color: "text-slate-500" },
 ];
 
 const StatusSelector = ({ userId, currentStatus }: StatusSelectorProps) => {
   const [status, setStatus] = useState(currentStatus);
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusChange = async (newStatus: string) => {
+    const oldStatus = status;
     setStatus(newStatus);
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = users.map((u: any) =>
-      u.id === userId ? { ...u, status: newStatus } : u
-    );
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
     
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-    if (currentUser.id === userId) {
-      currentUser.status = newStatus;
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    try {
+      // Update profile status in Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('id', userId);
+
+      if (profileError) throw profileError;
+
+      // Create status change record
+      const { error: changeError } = await supabase
+        .from('status_changes')
+        .insert({
+          user_id: userId,
+          old_status: oldStatus,
+          new_status: newStatus,
+          changed_by: userId,
+        });
+
+      if (changeError) throw changeError;
+
+      // Update localStorage for backward compatibility
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const updatedUsers = users.map((u: any) =>
+        u.id === userId ? { ...u, status: newStatus } : u
+      );
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      if (currentUser.id === userId) {
+        currentUser.status = newStatus;
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      }
+
+      toast.success('Status atualizado com sucesso!');
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast.error('Erro ao atualizar status');
+      // Revert status on error
+      setStatus(oldStatus);
     }
   };
 

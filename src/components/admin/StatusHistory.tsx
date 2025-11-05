@@ -56,12 +56,25 @@ export const StatusHistory = () => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available': return 'default';
-      case 'busy': return 'destructive';
-      case 'away': return 'secondary';
-      default: return 'outline';
+      case 'available': return 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20';
+      case 'busy': return 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20';
+      case 'away': return 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20';
+      case 'break': return 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20';
+      case 'offline': return 'bg-slate-500/10 text-slate-500 hover:bg-slate-500/20';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'available': return 'Disponível';
+      case 'busy': return 'Ocupado';
+      case 'away': return 'Ausente';
+      case 'break': return 'Pausa';
+      case 'offline': return 'Offline';
+      default: return status;
     }
   };
 
@@ -103,16 +116,16 @@ export const StatusHistory = () => {
                   </TableCell>
                   <TableCell>
                     {change.old_status ? (
-                      <Badge variant={getStatusBadgeVariant(change.old_status)}>
-                        {change.old_status}
+                      <Badge className={getStatusColor(change.old_status)}>
+                        {getStatusLabel(change.old_status)}
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(change.new_status)}>
-                      {change.new_status}
+                    <Badge className={getStatusColor(change.new_status)}>
+                      {getStatusLabel(change.new_status)}
                     </Badge>
                   </TableCell>
                   <TableCell>

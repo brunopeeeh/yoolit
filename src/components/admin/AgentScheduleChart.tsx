@@ -24,8 +24,17 @@ interface AgentShift {
 const statusColors: Record<string, string> = {
   available: 'bg-emerald-500',
   busy: 'bg-rose-500',
+  away: 'bg-amber-500',
   break: 'bg-amber-500',
   offline: 'bg-slate-500',
+};
+
+const statusLabels: Record<string, string> = {
+  available: 'Disponível',
+  busy: 'Ocupado',
+  away: 'Ausente',
+  break: 'Pausa',
+  offline: 'Offline',
 };
 
 const timeToPosition = (time: string): number => {
@@ -102,7 +111,7 @@ const AgentRow = ({ agent }: { agent: AgentShift }) => {
               left: `${segment.startPos}%`,
               width: `${segment.endPos - segment.startPos}%`,
             }}
-            title={`${segment.status} - ${format(new Date(), 'HH:mm')}`}
+            title={`${statusLabels[segment.status] || segment.status}`}
           />
         ))}
         {/* Status change markers */}
@@ -114,7 +123,7 @@ const AgentRow = ({ agent }: { agent: AgentShift }) => {
               key={change.id}
               className="absolute top-0 bottom-0 w-0.5 bg-background z-10"
               style={{ left: `${pos}%` }}
-              title={`${format(changeTime, 'HH:mm')} - ${change.old_status} → ${change.new_status}`}
+              title={`${format(changeTime, 'HH:mm')} - ${statusLabels[change.old_status || ''] || change.old_status || 'Início'} → ${statusLabels[change.new_status] || change.new_status}`}
             >
               <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-background border border-foreground rounded-full" />
             </div>
@@ -282,10 +291,10 @@ export const AgentScheduleChart = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-amber-500" />
-              <span className="text-sm text-muted-foreground">Pausa</span>
+              <span className="text-sm text-muted-foreground">Ausente/Pausa</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-cyan-500" />
+              <div className="w-4 h-4 rounded bg-slate-500" />
               <span className="text-sm text-muted-foreground">Offline</span>
             </div>
           </div>

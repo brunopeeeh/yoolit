@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -161,6 +161,9 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Agente</DialogTitle>
+          <DialogDescription>
+            Atualize as informações, permissões e escala de trabalho do agente
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="info" className="w-full">
