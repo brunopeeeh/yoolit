@@ -62,19 +62,27 @@ const Admin = () => {
       rolesLoading 
     });
     
-    // Aguarda TODOS os loadings terminarem antes de redirecionar
+    // Aguarda os loadings terminarem
     if (userLoading || rolesLoading) {
       return;
     }
     
-    // Agora que os loadings terminaram, verifica acesso
-    if (!localUser || !isAdmin) {
-      console.log('Redirecting to home - no access', { hasUser: !!localUser, isAdmin });
+    // Se não há usuário após loading terminar, redireciona
+    if (!localUser) {
+      console.log('Redirecting to home - no user after loading');
+      navigate('/');
+      return;
+    }
+    
+    // Se tem usuário mas não é admin, redireciona
+    if (!isAdmin) {
+      console.log('Redirecting to home - user not admin');
       navigate('/');
     }
   }, [localUser, isAdmin, userLoading, rolesLoading, navigate]);
 
-  if (userLoading || rolesLoading || !localUser) {
+  // Mostra loading enquanto carrega
+  if (userLoading || rolesLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center h-screen">
@@ -84,7 +92,8 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin || !supabaseUser) {
+  // Se não tem usuário ou não é admin, não renderiza nada (redirect acontece no useEffect)
+  if (!localUser || !isAdmin || !supabaseUser) {
     return null;
   }
 
