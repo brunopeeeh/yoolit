@@ -73,13 +73,19 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
         </div>
         
         <div className="flex items-center gap-2">
-          {isAdmin && location.pathname !== '/admin' && (
+          {isAdmin && (
             <Button
               size="icon"
               variant="ghost"
               className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
-              onClick={() => navigate('/admin?tab=dashboard')}
-              title="Painel Administrativo"
+              onClick={() => {
+                if (location.pathname === '/admin') {
+                  navigate('/');
+                } else {
+                  navigate('/admin?tab=dashboard');
+                }
+              }}
+              title={location.pathname === '/admin' ? 'Voltar ao Chat' : 'Painel Administrativo'}
             >
               <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
