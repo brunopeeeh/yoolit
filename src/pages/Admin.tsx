@@ -62,16 +62,14 @@ const Admin = () => {
       rolesLoading 
     });
     
-    // Só redireciona se não houver usuário E os loadings terminaram
-    if (!userLoading && !localUser) {
-      console.log('Redirecting to home - no user');
-      navigate('/');
+    // Aguarda TODOS os loadings terminarem antes de redirecionar
+    if (userLoading || rolesLoading) {
       return;
     }
     
-    // Só verifica admin após os roles serem carregados
-    if (!userLoading && !rolesLoading && localUser && !isAdmin) {
-      console.log('Redirecting to home - not admin');
+    // Agora que os loadings terminaram, verifica acesso
+    if (!localUser || !isAdmin) {
+      console.log('Redirecting to home - no access', { hasUser: !!localUser, isAdmin });
       navigate('/');
     }
   }, [localUser, isAdmin, userLoading, rolesLoading, navigate]);
