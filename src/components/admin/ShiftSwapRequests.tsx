@@ -213,7 +213,7 @@ export const ShiftSwapRequests = () => {
   const [requests, setRequests] = useState<SwapRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgent, setFilterAgent] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'cancelled' | 'completed' | 'all'>('pending');
+  const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
 
   const fetchRequests = async () => {
     try {
@@ -278,13 +278,11 @@ export const ShiftSwapRequests = () => {
         onValueChange={(value) => setFilterStatus(value as typeof filterStatus)} 
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="pending">Pendentes</TabsTrigger>
           <TabsTrigger value="approved">Aprovadas</TabsTrigger>
           <TabsTrigger value="rejected">Recusadas</TabsTrigger>
           <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="supervisor">Supervisor</TabsTrigger>
-          <TabsTrigger value="agent">Agente</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="mt-6">
@@ -354,50 +352,6 @@ export const ShiftSwapRequests = () => {
         </TabsContent>
 
         <TabsContent value="all" className="mt-6">
-          {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Carregando...
-            </div>
-          ) : requests.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Nenhuma solicitação encontrada
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {requests.map((request) => (
-                <SwapRequestCard 
-                  key={request.id} 
-                  request={request} 
-                  onUpdate={fetchRequests}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="supervisor" className="mt-6">
-          {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Carregando...
-            </div>
-          ) : requests.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Nenhuma solicitação encontrada
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {requests.map((request) => (
-                <SwapRequestCard 
-                  key={request.id} 
-                  request={request} 
-                  onUpdate={fetchRequests}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="agent" className="mt-6">
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground">
               Carregando...
