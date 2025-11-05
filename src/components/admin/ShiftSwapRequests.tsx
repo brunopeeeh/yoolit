@@ -209,10 +209,70 @@ export const ShiftSwapRequests = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgent, setFilterAgent] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [useMockData] = useState(true); // Para usar dados mockados
+
+  const mockRequests: SwapRequest[] = [
+    {
+      id: '1',
+      created_at: '2025-05-15T10:00:00',
+      reason: 'Consulta médica',
+      status: 'pending',
+      payment_scheduled_for: '2025-05-23T20:00:00',
+      requester: { id: '1', name: 'Roberto Dias' },
+      target: { id: '2', name: 'Camila Rocha' },
+      requester_shift: { shift_date: '2025-05-15', start_time: '14:00', end_time: '20:00' },
+      target_shift: { shift_date: '2025-05-15', start_time: '20:00', end_time: '02:00' }
+    },
+    {
+      id: '2',
+      created_at: '2025-05-14T08:30:00',
+      reason: 'Compromisso familiar',
+      status: 'pending',
+      payment_scheduled_for: null,
+      requester: { id: '3', name: 'Juliana Lima' },
+      target: { id: '4', name: 'João Pereira' },
+      requester_shift: { shift_date: '2025-05-14', start_time: '14:00', end_time: '20:00' },
+      target_shift: { shift_date: '2025-05-14', start_time: '08:00', end_time: '14:00' }
+    },
+    {
+      id: '3',
+      created_at: '2025-05-13T15:20:00',
+      reason: 'Aula na faculdade',
+      status: 'approved',
+      payment_scheduled_for: '2025-05-20T14:00:00',
+      requester: { id: '5', name: 'Lucas Duarte' },
+      target: { id: '6', name: 'Mariana Silva' },
+      requester_shift: { shift_date: '2025-05-13', start_time: '08:00', end_time: '14:00' },
+      target_shift: { shift_date: '2025-05-13', start_time: '14:00', end_time: '20:00' }
+    },
+    {
+      id: '4',
+      created_at: '2025-05-12T11:00:00',
+      reason: 'Exame de rotina',
+      status: 'rejected',
+      payment_scheduled_for: null,
+      requester: { id: '7', name: 'Bruno Oliveira' },
+      target: { id: '8', name: 'Andrea Guarani' },
+      requester_shift: { shift_date: '2025-05-12', start_time: '20:00', end_time: '02:00' },
+      target_shift: { shift_date: '2025-05-12', start_time: '14:00', end_time: '20:00' }
+    }
+  ];
 
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
+      
+      // Se usar dados mockados, filtrar localmente
+      if (useMockData) {
+        let filtered = mockRequests;
+        if (filterStatus !== 'all') {
+          filtered = filtered.filter(r => r.status === filterStatus);
+        }
+        setRequests(filtered);
+        setIsLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('shift_swap_requests')
         .select(`
