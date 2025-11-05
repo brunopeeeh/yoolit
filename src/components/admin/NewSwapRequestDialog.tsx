@@ -61,10 +61,22 @@ export const NewSwapRequestDialog = ({
     }
   }, [open]);
 
-  // Resetar campos quando o agente mudar
+  // Resetar campos quando o agente mudar e seleção automática
   useEffect(() => {
-    setSelectedTargetShift('');
-  }, [selectedAgent]);
+    if (selectedAgent) {
+      const agentData = agents.find(a => a.id === selectedAgent);
+      
+      // Se o agente tiver exatamente 1 turno, selecionar automaticamente
+      if (agentData && agentData.shifts.length === 1) {
+        setSelectedTargetShift(agentData.shifts[0].id);
+      } else {
+        // Se tiver múltiplos turnos ou nenhum, resetar
+        setSelectedTargetShift('');
+      }
+    } else {
+      setSelectedTargetShift('');
+    }
+  }, [selectedAgent, agents]);
 
   const fetchMyShifts = async () => {
     try {
@@ -102,14 +114,14 @@ export const NewSwapRequestDialog = ({
       if (shiftsError) throw shiftsError;
 
       // Combinar perfis com seus turnos (excluindo o usuário atual)
+      // TODOS os agentes são incluídos, mesmo sem turnos
       const agentsWithShifts = (profiles || [])
         .filter((profile: any) => profile.id !== user.id)
         .map((profile: any) => ({
           id: profile.id,
           name: profile.name || 'Sem nome',
           shifts: (shifts || []).filter((shift: any) => shift.user_id === profile.id)
-        }))
-        .filter(agent => agent.shifts.length > 0);
+        }));
 
       setAgents(agentsWithShifts);
     } catch (error) {
@@ -200,7 +212,36 @@ export const NewSwapRequestDialog = ({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Meu turno */}
+          {/* Selecionar agente - PRIMEIRO */}
+          <div className="space-y-2">
+            <Label htmlFor="target-agent">
+              <User className="inline h-4 w-4 mr-2" />
+              Agente
+            </Label>
+            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+              <SelectTrigger id="target-agent" className={errors.target_id ? 'border-destructive' : ''}>
+                <SelectValue placeholder="Selecione o agente" />
+              </SelectTrigger>
+              <SelectContent>
+                {agents.length === 0 ? (
+                  <div className="p-4 text-sm text-muted-foreground text-center">
+                    Nenhum agente disponível
+                  </div>
+                ) : (
+                  agents.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.name} {agent.shifts.length > 0 && `(${agent.shifts.length} turnos)`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {errors.target_id && (
+              <p className="text-sm text-destructive">{errors.target_id}</p>
+            )}
+          </div>
+
+          {/* Meu turno - SEGUNDO */}
           <div className="space-y-2">
             <Label htmlFor="my-shift">
               <Calendar className="inline h-4 w-4 mr-2" />
@@ -229,58 +270,51 @@ export const NewSwapRequestDialog = ({
             )}
           </div>
 
-          {/* Selecionar agente */}
-          <div className="space-y-2">
-            <Label htmlFor="target-agent">
-              <User className="inline h-4 w-4 mr-2" />
-              Agente
-            </Label>
-            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-              <SelectTrigger id="target-agent" className={errors.target_id ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Selecione o agente" />
-              </SelectTrigger>
-              <SelectContent>
-                {agents.length === 0 ? (
-                  <div className="p-4 text-sm text-muted-foreground text-center">
-                    Nenhum agente com turnos disponíveis
-                  </div>
-                ) : (
-                  agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name} ({agent.shifts.length} turnos)
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            {errors.target_id && (
-              <p className="text-sm text-destructive">{errors.target_id}</p>
-            )}
-          </div>
-
-          {/* Turno do agente */}
-          {selectedAgent && (
-            <div className="space-y-2">
-              <Label htmlFor="target-shift">
-                <Clock className="inline h-4 w-4 mr-2" />
-                Turno do Agente
-              </Label>
-              <Select value={selectedTargetShift} onValueChange={setSelectedTargetShift}>
-                <SelectTrigger id="target-shift" className={errors.target_shift_id ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="Selecione o turno do agente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedAgentData?.shifts.map((shift) => (
-                    <SelectItem key={shift.id} value={shift.id}>
-                      {formatShiftDisplay(shift)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.target_shift_id && (
-                <p className="text-sm text-destructive">{errors.target_shift_id}</p>
+          {/* Turno do agente - TERCEIRO (condicional) */}
+          {selectedAgent && selectedAgentData && (
+            <>
+              {selectedAgentData.shifts.length === 0 && (
+                <div className="p-4 text-sm text-amber-600 bg-amber-50 rounded-md border border-amber-200">
+                  ⚠️ Este agente não possui turnos futuros disponíveis para troca
+                </div>
               )}
-            </div>
+              
+              {selectedAgentData.shifts.length === 1 && (
+                <div className="space-y-2">
+                  <Label>
+                    <Clock className="inline h-4 w-4 mr-2" />
+                    Turno do Agente (selecionado automaticamente)
+                  </Label>
+                  <div className="p-3 bg-muted rounded-md text-sm">
+                    {formatShiftDisplay(selectedAgentData.shifts[0])}
+                  </div>
+                </div>
+              )}
+              
+              {selectedAgentData.shifts.length > 1 && (
+                <div className="space-y-2">
+                  <Label htmlFor="target-shift">
+                    <Clock className="inline h-4 w-4 mr-2" />
+                    Turno do Agente
+                  </Label>
+                  <Select value={selectedTargetShift} onValueChange={setSelectedTargetShift}>
+                    <SelectTrigger id="target-shift" className={errors.target_shift_id ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Selecione o turno do agente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedAgentData.shifts.map((shift) => (
+                        <SelectItem key={shift.id} value={shift.id}>
+                          {formatShiftDisplay(shift)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.target_shift_id && (
+                    <p className="text-sm text-destructive">{errors.target_shift_id}</p>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {/* Motivo */}
@@ -312,7 +346,14 @@ export const NewSwapRequestDialog = ({
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={isLoading || !selectedMyShift || !selectedAgent || !selectedTargetShift || !reason.trim()}
+            disabled={
+              isLoading || 
+              !selectedMyShift || 
+              !selectedAgent || 
+              !selectedTargetShift || 
+              !reason.trim() ||
+              (selectedAgentData && selectedAgentData.shifts.length === 0)
+            }
             className="bg-cyan-500 hover:bg-cyan-600"
           >
             {isLoading ? 'Criando...' : 'Criar Solicitação'}
