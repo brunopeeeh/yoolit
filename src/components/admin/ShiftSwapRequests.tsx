@@ -344,6 +344,58 @@ export const ShiftSwapRequests = () => {
     fetchRequests();
   }, [filterStatus]);
 
+  // Setup realtime subscription for shift swap requests
+  useEffect(() => {
+    const channel = supabase
+      .channel('shift-swap-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shift_swap_requests'
+        },
+        (payload) => {
+          console.log('Nova solicitação criada:', payload);
+          toast.success('Nova solicitação de troca criada!');
+          fetchRequests();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'shift_swap_requests'
+        },
+        (payload) => {
+          const newStatus = (payload.new as any).status;
+          const oldStatus = (payload.old as any).status;
+          
+          if (newStatus !== oldStatus) {
+            console.log('Status da solicitação atualizado:', payload);
+            
+            if (newStatus === 'approved') {
+              toast.success('Solicitação aprovada!');
+            } else if (newStatus === 'rejected') {
+              toast.error('Solicitação recusada');
+            } else if (newStatus === 'completed') {
+              toast.success('Solicitação concluída!');
+            } else if (newStatus === 'cancelled') {
+              toast.info('Solicitação cancelada');
+            }
+            
+            fetchRequests();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [filterStatus]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
