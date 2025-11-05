@@ -92,7 +92,6 @@ const AgentRow = ({ agent }: { agent: AgentShift }) => {
     <div className="flex items-center gap-4 py-2 border-b border-border last:border-0">
       <div className="w-40 text-sm text-muted-foreground text-right flex-shrink-0">
         <div className="font-medium">{agent.name}</div>
-        <div className="text-xs">{agent.email}</div>
       </div>
       <div className="flex-1 relative h-8 bg-muted/30 rounded overflow-hidden">
         {segments.map((segment, index) => (
