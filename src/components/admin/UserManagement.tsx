@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus } from 'lucide-react';
-import { RoleDialog } from './RoleDialog';
+import { EditAgentDialog } from './EditAgentDialog';
 import { NewAgentDialog } from './NewAgentDialog';
 
 type Profile = {
@@ -69,7 +69,7 @@ export const UserManagement = () => {
     fetchProfiles();
   }, []);
 
-  const handleEditRoles = (profile: Profile) => {
+  const handleEditAgent = (profile: Profile) => {
     setSelectedUser(profile);
     setIsDialogOpen(true);
   };
@@ -144,7 +144,7 @@ export const UserManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEditRoles(profile)}
+                      onClick={() => handleEditAgent(profile)}
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
                       Editar
@@ -158,11 +158,11 @@ export const UserManagement = () => {
       </Card>
 
       {selectedUser && (
-        <RoleDialog
+        <EditAgentDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
           user={selectedUser}
-          onClose={handleDialogClose}
+          onSuccess={handleDialogClose}
         />
       )}
 
