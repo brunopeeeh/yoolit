@@ -16,7 +16,7 @@ import type { User } from '@supabase/supabase-js';
 
 const Admin = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,6 +29,10 @@ const Admin = () => {
     approvedSwaps: 24,
     coverage: 95,
   });
+
+  const handleTabChange = (newTab: string) => {
+    setSearchParams({ tab: newTab });
+  };
 
 
   useEffect(() => {
@@ -108,7 +112,7 @@ const Admin = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-5 max-w-[1000px]">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />

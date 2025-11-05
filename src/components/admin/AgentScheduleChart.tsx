@@ -176,6 +176,43 @@ export const AgentScheduleChart = () => {
 
   useEffect(() => {
     fetchAgentData();
+
+    // Listener para mudanças na tabela profiles (status updates)
+    const profilesChannel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          fetchAgentData();
+        }
+      )
+      .subscribe();
+
+    // Listener para mudanças na tabela status_changes
+    const statusChangesChannel = supabase
+      .channel('status-changes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'status_changes'
+        },
+        () => {
+          fetchAgentData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(statusChangesChannel);
+    };
   }, []);
 
   const fetchAgentData = async () => {
