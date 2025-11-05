@@ -95,12 +95,15 @@ export type Database = {
           payment_scheduled_for: string | null
           reason: string
           requester_id: string
-          requester_shift_id: string
+          requester_schedule_id: string | null
+          requester_shift_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["swap_request_status"]
+          swap_date: string | null
           target_id: string
-          target_shift_id: string
+          target_schedule_id: string | null
+          target_shift_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -109,12 +112,15 @@ export type Database = {
           payment_scheduled_for?: string | null
           reason: string
           requester_id: string
-          requester_shift_id: string
+          requester_schedule_id?: string | null
+          requester_shift_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["swap_request_status"]
+          swap_date?: string | null
           target_id: string
-          target_shift_id: string
+          target_schedule_id?: string | null
+          target_shift_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -123,12 +129,15 @@ export type Database = {
           payment_scheduled_for?: string | null
           reason?: string
           requester_id?: string
-          requester_shift_id?: string
+          requester_schedule_id?: string | null
+          requester_shift_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["swap_request_status"]
+          swap_date?: string | null
           target_id?: string
-          target_shift_id?: string
+          target_schedule_id?: string | null
+          target_shift_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -137,6 +146,13 @@ export type Database = {
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_requester_schedule_id_fkey"
+            columns: ["requester_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "agent_schedules"
             referencedColumns: ["id"]
           },
           {
@@ -158,6 +174,13 @@ export type Database = {
             columns: ["target_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_target_schedule_id_fkey"
+            columns: ["target_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "agent_schedules"
             referencedColumns: ["id"]
           },
           {
@@ -273,6 +296,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      list_agent_schedules_for_swaps: {
+        Args: never
+        Returns: {
+          break_end_time: string
+          break_start_time: string
+          day_of_week: string
+          id: string
+          user_id: string
+          work_end_time: string
+          work_start_time: string
+        }[]
       }
       list_agents_for_swaps: {
         Args: never

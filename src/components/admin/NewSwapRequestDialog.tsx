@@ -4,32 +4,39 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { z } from 'zod';
-import { Calendar, Clock, User } from 'lucide-react';
-import { formatShiftType } from '@/lib/shiftUtils';
+import { Calendar, Clock, User, CalendarIcon } from 'lucide-react';
+import { getDayOfWeekName } from '@/lib/shiftUtils';
+import { cn } from '@/lib/utils';
 
-interface Shift {
+interface AgentSchedule {
   id: string;
-  shift_date: string;
-  start_time: string;
-  end_time: string;
-  shift_type: string;
+  user_id: string;
+  day_of_week: string;
+  work_start_time: string;
+  work_end_time: string;
+  break_start_time: string | null;
+  break_end_time: string | null;
 }
 
 interface Agent {
   id: string;
   name: string;
-  shifts: Shift[];
 }
 
 const swapRequestSchema = z.object({
-  requester_shift_id: z.string().min(1, 'Selecione seu turno'),
+  swap_date: z.date({
+    required_error: 'Selecione uma data'
+  }),
   target_id: z.string().min(1, 'Selecione o agente'),
-  target_shift_id: z.string().min(1, 'Selecione o turno do agente'),
+  requester_schedule_id: z.string().min(1, 'Você não possui horário configurado para este dia'),
+  target_schedule_id: z.string().min(1, 'O agente não possui horário configurado para este dia'),
   reason: z.string().trim().min(10, 'Motivo deve ter pelo menos 10 caracteres').max(500, 'Motivo deve ter no máximo 500 caracteres'),
 });
 
@@ -44,56 +51,61 @@ export const NewSwapRequestDialog = ({
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }) => {
-  const [myShifts, setMyShifts] = useState<Shift[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [selectedMyShift, setSelectedMyShift] = useState<string>('');
+  const [agentSchedules, setAgentSchedules] = useState<AgentSchedule[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedAgent, setSelectedAgent] = useState<string>('');
-  const [selectedTargetShift, setSelectedTargetShift] = useState<string>('');
+  const [myScheduleForDate, setMyScheduleForDate] = useState<AgentSchedule | null>(null);
+  const [targetScheduleForDate, setTargetScheduleForDate] = useState<AgentSchedule | null>(null);
   const [reason, setReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof SwapRequestForm, string>>>({});
 
-  // Buscar meus turnos
+  // Buscar dados iniciais
   useEffect(() => {
     if (open) {
-      fetchMyShifts();
       fetchAgents();
+      fetchAgentSchedules();
     }
   }, [open]);
 
-  // Resetar campos quando o agente mudar e seleção automática
+  // Atualizar horários quando data ou agente mudarem
   useEffect(() => {
-    if (selectedAgent) {
-      const agentData = agents.find(a => a.id === selectedAgent);
-      
-      // Se o agente tiver exatamente 1 turno, selecionar automaticamente
-      if (agentData && agentData.shifts.length === 1) {
-        setSelectedTargetShift(agentData.shifts[0].id);
+    const updateSchedules = async () => {
+      if (selectedDate && agentSchedules.length > 0) {
+        const dayOfWeek = getDayOfWeekCode(selectedDate);
+        
+        // Buscar schedule do usuário atual
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const mySchedule = agentSchedules.find(
+            s => s.user_id === user.id && s.day_of_week === dayOfWeek
+          );
+          setMyScheduleForDate(mySchedule || null);
+        }
+        
+        // Buscar schedule do agente selecionado
+        if (selectedAgent) {
+          const targetSchedule = agentSchedules.find(
+            s => s.user_id === selectedAgent && s.day_of_week === dayOfWeek
+          );
+          setTargetScheduleForDate(targetSchedule || null);
+        } else {
+          setTargetScheduleForDate(null);
+        }
       } else {
-        // Se tiver múltiplos turnos ou nenhum, resetar
-        setSelectedTargetShift('');
+        setMyScheduleForDate(null);
+        setTargetScheduleForDate(null);
       }
-    } else {
-      setSelectedTargetShift('');
-    }
-  }, [selectedAgent, agents]);
+    };
+    
+    updateSchedules();
+  }, [selectedDate, selectedAgent, agentSchedules]);
 
-  const fetchMyShifts = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .rpc('list_future_shifts_for_swaps');
-
-      if (error) throw error;
-      
-      const myShifts = (data || []).filter((shift: any) => shift.user_id === user.id);
-      setMyShifts(myShifts);
-    } catch (error) {
-      console.error('Error fetching my shifts:', error);
-      toast.error('Erro ao carregar seus turnos');
-    }
+  const getDayOfWeekCode = (date: Date): string => {
+    const dayNum = date.getDay(); // 0 = domingo, 6 = sábado
+    const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+    return days[dayNum];
   };
 
   const fetchAgents = async () => {
@@ -101,49 +113,50 @@ export const NewSwapRequestDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Buscar todos os agentes
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles, error } = await supabase
         .rpc('list_agents_for_swaps');
 
-      if (profilesError) throw profilesError;
+      if (error) throw error;
 
-      // Buscar turnos futuros
-      const { data: shifts, error: shiftsError } = await supabase
-        .rpc('list_future_shifts_for_swaps');
-
-      if (shiftsError) throw shiftsError;
-
-      // Combinar perfis com seus turnos (excluindo o usuário atual)
-      // TODOS os agentes são incluídos, mesmo sem turnos
-      const agentsWithShifts = (profiles || [])
+      const agentsList = (profiles || [])
         .filter((profile: any) => profile.id !== user.id)
         .map((profile: any) => ({
           id: profile.id,
           name: profile.name || 'Sem nome',
-          shifts: (shifts || []).filter((shift: any) => shift.user_id === profile.id)
         }));
 
-      setAgents(agentsWithShifts);
+      setAgents(agentsList);
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast.error('Erro ao carregar agentes');
     }
   };
 
-  const formatShiftDisplay = (shift: Shift) => {
-    const date = format(new Date(shift.shift_date), "dd/MM/yyyy (EEE)", { locale: ptBR });
-    const time = `${shift.start_time.substring(0, 5)} - ${shift.end_time.substring(0, 5)}`;
-    const shiftType = formatShiftType(shift.shift_type as 'morning' | 'afternoon' | 'night');
-    return `${date} • ${shiftType} • ${time}`;
+  const fetchAgentSchedules = async () => {
+    try {
+      const { data: schedules, error } = await supabase
+        .rpc('list_agent_schedules_for_swaps');
+      
+      if (error) throw error;
+      setAgentSchedules(schedules || []);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast.error('Erro ao carregar horários dos agentes');
+    }
   };
 
   const handleSubmit = async () => {
     try {
-      // Validar formulário
-      const formData: SwapRequestForm = {
-        requester_shift_id: selectedMyShift,
+      if (!selectedDate || !myScheduleForDate || !targetScheduleForDate) {
+        toast.error('Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      const formData = {
+        swap_date: selectedDate,
         target_id: selectedAgent,
-        target_shift_id: selectedTargetShift,
+        requester_schedule_id: myScheduleForDate.id,
+        target_schedule_id: targetScheduleForDate.id,
         reason: reason,
       };
 
@@ -167,14 +180,14 @@ export const NewSwapRequestDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Criar solicitação
       const { error } = await supabase
         .from('shift_swap_requests')
         .insert({
           requester_id: user.id,
-          requester_shift_id: selectedMyShift,
           target_id: selectedAgent,
-          target_shift_id: selectedTargetShift,
+          swap_date: format(selectedDate, 'yyyy-MM-dd'),
+          requester_schedule_id: myScheduleForDate.id,
+          target_schedule_id: targetScheduleForDate.id,
           reason: reason.trim(),
           status: 'pending'
         });
@@ -184,10 +197,11 @@ export const NewSwapRequestDialog = ({
       toast.success('Solicitação criada com sucesso');
       
       // Resetar formulário
-      setSelectedMyShift('');
+      setSelectedDate(undefined);
       setSelectedAgent('');
-      setSelectedTargetShift('');
       setReason('');
+      setMyScheduleForDate(null);
+      setTargetScheduleForDate(null);
       
       onOpenChange(false);
       onSuccess();
@@ -198,8 +212,6 @@ export const NewSwapRequestDialog = ({
       setIsLoading(false);
     }
   };
-
-  const selectedAgentData = agents.find(a => a.id === selectedAgent);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -212,7 +224,47 @@ export const NewSwapRequestDialog = ({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Selecionar agente - PRIMEIRO */}
+          {/* Data - PRIMEIRO */}
+          <div className="space-y-2">
+            <Label htmlFor="swap-date">
+              <CalendarIcon className="inline h-4 w-4 mr-2" />
+              Data da Troca
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground",
+                    errors.swap_date && "border-destructive"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? (
+                    format(selectedDate, "PPP", { locale: ptBR })
+                  ) : (
+                    <span>Selecione uma data</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {errors.swap_date && (
+              <p className="text-sm text-destructive">{errors.swap_date}</p>
+            )}
+          </div>
+
+          {/* Agente - SEGUNDO */}
           <div className="space-y-2">
             <Label htmlFor="target-agent">
               <User className="inline h-4 w-4 mr-2" />
@@ -230,7 +282,7 @@ export const NewSwapRequestDialog = ({
                 ) : (
                   agents.map((agent) => (
                     <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name} {agent.shifts.length > 0 && `(${agent.shifts.length} turnos)`}
+                      {agent.name}
                     </SelectItem>
                   ))
                 )}
@@ -241,83 +293,59 @@ export const NewSwapRequestDialog = ({
             )}
           </div>
 
-          {/* Meu turno - SEGUNDO */}
-          <div className="space-y-2">
-            <Label htmlFor="my-shift">
-              <Calendar className="inline h-4 w-4 mr-2" />
-              Seu Turno
-            </Label>
-            <Select value={selectedMyShift} onValueChange={setSelectedMyShift}>
-              <SelectTrigger id="my-shift" className={errors.requester_shift_id ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Selecione seu turno" />
-              </SelectTrigger>
-              <SelectContent>
-                {myShifts.length === 0 ? (
-                  <div className="p-4 text-sm text-muted-foreground text-center">
-                    Nenhum turno disponível
+          {/* Seu horário - TERCEIRO (automático) */}
+          {selectedDate && myScheduleForDate && (
+            <div className="space-y-2">
+              <Label>
+                <Clock className="inline h-4 w-4 mr-2" />
+                Seu Horário ({getDayOfWeekName(myScheduleForDate.day_of_week)})
+              </Label>
+              <div className="p-3 bg-muted rounded-md text-sm">
+                <div className="font-medium">
+                  {myScheduleForDate.work_start_time.substring(0, 5)} - {myScheduleForDate.work_end_time.substring(0, 5)}
+                </div>
+                {myScheduleForDate.break_start_time && myScheduleForDate.break_end_time && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Intervalo: {myScheduleForDate.break_start_time.substring(0, 5)} - {myScheduleForDate.break_end_time.substring(0, 5)}
                   </div>
-                ) : (
-                  myShifts.map((shift) => (
-                    <SelectItem key={shift.id} value={shift.id}>
-                      {formatShiftDisplay(shift)}
-                    </SelectItem>
-                  ))
                 )}
-              </SelectContent>
-            </Select>
-            {errors.requester_shift_id && (
-              <p className="text-sm text-destructive">{errors.requester_shift_id}</p>
-            )}
-          </div>
-
-          {/* Turno do agente - TERCEIRO (condicional) */}
-          {selectedAgent && selectedAgentData && (
-            <>
-              {selectedAgentData.shifts.length === 0 && (
-                <div className="p-4 text-sm text-amber-600 bg-amber-50 rounded-md border border-amber-200">
-                  ⚠️ Este agente não possui turnos futuros disponíveis para troca
-                </div>
-              )}
-              
-              {selectedAgentData.shifts.length === 1 && (
-                <div className="space-y-2">
-                  <Label>
-                    <Clock className="inline h-4 w-4 mr-2" />
-                    Turno do Agente (selecionado automaticamente)
-                  </Label>
-                  <div className="p-3 bg-muted rounded-md text-sm">
-                    {formatShiftDisplay(selectedAgentData.shifts[0])}
-                  </div>
-                </div>
-              )}
-              
-              {selectedAgentData.shifts.length > 1 && (
-                <div className="space-y-2">
-                  <Label htmlFor="target-shift">
-                    <Clock className="inline h-4 w-4 mr-2" />
-                    Turno do Agente
-                  </Label>
-                  <Select value={selectedTargetShift} onValueChange={setSelectedTargetShift}>
-                    <SelectTrigger id="target-shift" className={errors.target_shift_id ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Selecione o turno do agente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedAgentData.shifts.map((shift) => (
-                        <SelectItem key={shift.id} value={shift.id}>
-                          {formatShiftDisplay(shift)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.target_shift_id && (
-                    <p className="text-sm text-destructive">{errors.target_shift_id}</p>
-                  )}
-                </div>
-              )}
-            </>
+              </div>
+            </div>
           )}
 
-          {/* Motivo */}
+          {selectedDate && !myScheduleForDate && (
+            <div className="p-4 text-sm text-amber-600 bg-amber-50 rounded-md border border-amber-200">
+              ⚠️ Você não possui horário configurado para {selectedDate && getDayOfWeekName(getDayOfWeekCode(selectedDate))}
+            </div>
+          )}
+
+          {/* Horário do agente - QUARTO (automático) */}
+          {selectedDate && selectedAgent && targetScheduleForDate && (
+            <div className="space-y-2">
+              <Label>
+                <Clock className="inline h-4 w-4 mr-2" />
+                Horário do Agente ({getDayOfWeekName(targetScheduleForDate.day_of_week)})
+              </Label>
+              <div className="p-3 bg-muted rounded-md text-sm">
+                <div className="font-medium">
+                  {targetScheduleForDate.work_start_time.substring(0, 5)} - {targetScheduleForDate.work_end_time.substring(0, 5)}
+                </div>
+                {targetScheduleForDate.break_start_time && targetScheduleForDate.break_end_time && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Intervalo: {targetScheduleForDate.break_start_time.substring(0, 5)} - {targetScheduleForDate.break_end_time.substring(0, 5)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {selectedDate && selectedAgent && !targetScheduleForDate && (
+            <div className="p-4 text-sm text-amber-600 bg-amber-50 rounded-md border border-amber-200">
+              ⚠️ O agente selecionado não possui horário configurado para {selectedDate && getDayOfWeekName(getDayOfWeekCode(selectedDate))}
+            </div>
+          )}
+
+          {/* Motivo - QUINTO */}
           <div className="space-y-2">
             <Label htmlFor="reason">Motivo da Troca</Label>
             <Textarea
@@ -348,11 +376,11 @@ export const NewSwapRequestDialog = ({
             onClick={handleSubmit} 
             disabled={
               isLoading || 
-              !selectedMyShift || 
+              !selectedDate ||
               !selectedAgent || 
-              !selectedTargetShift || 
-              !reason.trim() ||
-              (selectedAgentData && selectedAgentData.shifts.length === 0)
+              !myScheduleForDate ||
+              !targetScheduleForDate ||
+              !reason.trim()
             }
             className="bg-cyan-500 hover:bg-cyan-600"
           >

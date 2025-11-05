@@ -17,6 +17,7 @@ interface SwapRequest {
   reason: string;
   status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'completed';
   payment_scheduled_for: string | null;
+  swap_date: string | null;
   requester: {
     id: string;
     name: string;
@@ -25,12 +26,23 @@ interface SwapRequest {
     id: string;
     name: string;
   };
-  requester_shift: {
+  requester_schedule?: {
+    day_of_week: string;
+    work_start_time: string;
+    work_end_time: string;
+  };
+  target_schedule?: {
+    day_of_week: string;
+    work_start_time: string;
+    work_end_time: string;
+  };
+  // Manter campos antigos para compatibilidade
+  requester_shift?: {
     shift_date: string;
     start_time: string;
     end_time: string;
   };
-  target_shift: {
+  target_shift?: {
     shift_date: string;
     start_time: string;
     end_time: string;
@@ -134,12 +146,25 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
             </div>
             <div className="flex-1">
               <p className="font-medium text-sm">{request.requester.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatTime(request.requester_shift.start_time)} - {formatTime(request.requester_shift.end_time)}
-              </p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {getDayOfWeek(request.requester_shift.shift_date)}
-              </p>
+              {request.requester_schedule ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTime(request.requester_schedule.work_start_time)} - {formatTime(request.requester_schedule.work_end_time)}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {request.swap_date ? getDayOfWeek(request.swap_date) : request.requester_schedule.day_of_week}
+                  </p>
+                </>
+              ) : request.requester_shift ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTime(request.requester_shift.start_time)} - {formatTime(request.requester_shift.end_time)}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {getDayOfWeek(request.requester_shift.shift_date)}
+                  </p>
+                </>
+              ) : null}
             </div>
           </div>
 
@@ -148,12 +173,25 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
           <div className="flex-1 flex items-center gap-3 justify-end">
             <div className="flex-1 text-right">
               <p className="font-medium text-sm">{request.target.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatTime(request.target_shift.start_time)} - {formatTime(request.target_shift.end_time)}
-              </p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {getDayOfWeek(request.target_shift.shift_date)}
-              </p>
+              {request.target_schedule ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTime(request.target_schedule.work_start_time)} - {formatTime(request.target_schedule.work_end_time)}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {request.swap_date ? getDayOfWeek(request.swap_date) : request.target_schedule.day_of_week}
+                  </p>
+                </>
+              ) : request.target_shift ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTime(request.target_shift.start_time)} - {formatTime(request.target_shift.end_time)}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {getDayOfWeek(request.target_shift.shift_date)}
+                  </p>
+                </>
+              ) : null}
             </div>
             <div className="w-12 h-12 rounded-full bg-background border-2 border-secondary flex items-center justify-center font-bold text-sm">
               {getInitials(request.target.name)}
@@ -240,10 +278,25 @@ export const ShiftSwapRequests = () => {
           reason,
           status,
           payment_scheduled_for,
+          swap_date,
           requester_id,
           target_id,
           requester_shift_id,
-          target_shift_id
+          target_shift_id,
+          requester_schedule_id,
+          target_schedule_id,
+          requester:profiles!shift_swap_requests_requester_id_fkey(id, name),
+          target:profiles!shift_swap_requests_target_id_fkey(id, name),
+          requester_schedule:agent_schedules!shift_swap_requests_requester_schedule_id_fkey(
+            day_of_week,
+            work_start_time,
+            work_end_time
+          ),
+          target_schedule:agent_schedules!shift_swap_requests_target_schedule_id_fkey(
+            day_of_week,
+            work_start_time,
+            work_end_time
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -265,71 +318,19 @@ export const ShiftSwapRequests = () => {
         return;
       }
 
-      // Buscar perfis dos usuários envolvidos
-      const userIds = new Set<string>();
-      swapRequests.forEach(req => {
-        userIds.add(req.requester_id);
-        userIds.add(req.target_id);
-      });
-
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .in('id', Array.from(userIds));
-
-      if (profilesError) throw profilesError;
-
-      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
-
-      // Buscar turnos
-      const shiftIds = new Set<string>();
-      swapRequests.forEach(req => {
-        shiftIds.add(req.requester_shift_id);
-        shiftIds.add(req.target_shift_id);
-      });
-
-      const { data: shifts, error: shiftsError } = await supabase
-        .from('shifts')
-        .select('id, shift_date, start_time, end_time')
-        .in('id', Array.from(shiftIds));
-
-      if (shiftsError) throw shiftsError;
-
-      const shiftsMap = new Map(shifts?.map(s => [s.id, s]) || []);
-
-      // Montar os dados completos
-      const completeRequests: SwapRequest[] = swapRequests.map(req => {
-        const requesterProfile = profilesMap.get(req.requester_id);
-        const targetProfile = profilesMap.get(req.target_id);
-        const requesterShift = shiftsMap.get(req.requester_shift_id);
-        const targetShift = shiftsMap.get(req.target_shift_id);
-
-        return {
-          id: req.id,
-          created_at: req.created_at,
-          reason: req.reason,
-          status: req.status,
-          payment_scheduled_for: req.payment_scheduled_for,
-          requester: {
-            id: req.requester_id,
-            name: requesterProfile?.name || 'Usuário desconhecido'
-          },
-          target: {
-            id: req.target_id,
-            name: targetProfile?.name || 'Usuário desconhecido'
-          },
-          requester_shift: {
-            shift_date: requesterShift?.shift_date || '',
-            start_time: requesterShift?.start_time || '',
-            end_time: requesterShift?.end_time || ''
-          },
-          target_shift: {
-            shift_date: targetShift?.shift_date || '',
-            start_time: targetShift?.start_time || '',
-            end_time: targetShift?.end_time || ''
-          }
-        };
-      });
+      // Os dados já vêm completos com os JOINs
+      const completeRequests: SwapRequest[] = swapRequests.map((req: any) => ({
+        id: req.id,
+        created_at: req.created_at,
+        reason: req.reason,
+        status: req.status,
+        payment_scheduled_for: req.payment_scheduled_for,
+        swap_date: req.swap_date,
+        requester: req.requester || { id: req.requester_id, name: 'Usuário desconhecido' },
+        target: req.target || { id: req.target_id, name: 'Usuário desconhecido' },
+        requester_schedule: req.requester_schedule,
+        target_schedule: req.target_schedule,
+      }));
 
       setRequests(completeRequests);
     } catch (error) {
