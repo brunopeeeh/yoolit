@@ -10,7 +10,8 @@ import { ShiftManagement } from '@/components/admin/ShiftManagement';
 import { StatusHistory } from '@/components/admin/StatusHistory';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
-import { BarChart3, Shield, Calendar, History } from 'lucide-react';
+import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
+import { BarChart3, Shield, Calendar, History, RefreshCw, Users } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -118,13 +119,17 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-[800px]">
+          <TabsList className="grid w-full grid-cols-5 max-w-[1000px]">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Dashboard Supervisor
             </TabsTrigger>
+            <TabsTrigger value="swap-requests" className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Solicitações de Troca
+            </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+              <Users className="h-4 w-4" />
               Agentes
             </TabsTrigger>
             <TabsTrigger value="shifts" className="flex items-center gap-2">
@@ -146,6 +151,10 @@ const Admin = () => {
               coverage={dashboardData.coverage}
             />
             <AgentScheduleChart shifts={mockAgentShifts} />
+          </TabsContent>
+
+          <TabsContent value="swap-requests" className="mt-6">
+            <ShiftSwapRequests />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
