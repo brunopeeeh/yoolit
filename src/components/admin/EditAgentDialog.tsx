@@ -93,6 +93,12 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
 
   const handleSaveRoles = async () => {
     try {
+      // Get current user ID
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        throw new Error('Usuário não autenticado');
+      }
+
       // Remove all existing roles
       const { error: deleteError } = await supabase
         .from('user_roles')
@@ -101,14 +107,15 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
 
       if (deleteError) throw deleteError;
 
-      // Add new roles
+      // Add new roles with created_by field
       if (selectedRoles.length > 0) {
         const { error: insertError } = await supabase
           .from('user_roles')
           .insert(
             selectedRoles.map(role => ({
               user_id: user.id,
-              role: role as 'admin' | 'agent' | 'supervisor'
+              role: role as 'admin' | 'agent' | 'supervisor',
+              created_by: currentUser.id
             }))
           );
 
