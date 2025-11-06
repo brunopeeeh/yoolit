@@ -5,12 +5,11 @@ import Header from '@/components/layout/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { UserManagement } from '@/components/admin/UserManagement';
-import { StatusHistory } from '@/components/admin/StatusHistory';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
 import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
 import { AgentWeeklySchedule } from '@/components/admin/AgentWeeklySchedule';
-import { BarChart3, Shield, Calendar, History, RefreshCw, Users } from 'lucide-react';
+import { BarChart3, Shield, Calendar, RefreshCw, Users } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -113,7 +112,7 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className={isAgent && !isAdmin ? "grid w-full max-w-[300px]" : "grid w-full grid-cols-5 max-w-[1000px]"}>
+          <TabsList className={isAgent && !isAdmin ? "grid w-full max-w-[300px]" : "grid w-full grid-cols-4 max-w-[800px]"}>
             {!isAgent || isAdmin ? (
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
@@ -133,10 +132,6 @@ const Admin = () => {
                 <TabsTrigger value="shifts" className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Escalas
-                </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center gap-2">
-                  <History className="h-4 w-4" />
-                  Histórico
                 </TabsTrigger>
               </>
             ) : null}
@@ -167,10 +162,6 @@ const Admin = () => {
 
               <TabsContent value="shifts" className="mt-6">
                 <AgentWeeklySchedule />
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-6">
-                <StatusHistory />
               </TabsContent>
             </>
           ) : null}
