@@ -377,11 +377,21 @@ export const NewSwapRequestDialog = ({
                     Nenhum agente disponível
                   </div>
                 ) : (
-                  agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name}
-                    </SelectItem>
-                  ))
+                  agents.map((agent) => {
+                    const hasPendingCredit = swapCredits.some(credit => credit.debtor_id === agent.id);
+                    return (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{agent.name}</span>
+                          {hasPendingCredit && (
+                            <span className="text-xs text-emerald-600 font-semibold ml-2">
+                              • Tem troca pendente
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })
                 )}
               </SelectContent>
             </Select>
