@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { CheckCircle, XCircle, User, Calendar, FileText, Link as LinkIcon, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -146,97 +147,128 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-4xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Conclusões da Tarefa</DialogTitle>
+          <DialogTitle className="text-2xl">Conclusões da Tarefa</DialogTitle>
           <DialogDescription>
-            Revise e aprove as conclusões dos agentes
+            Revise e aprove as conclusões submetidas pelos agentes
           </DialogDescription>
         </DialogHeader>
         {isLoading ? (
-          <div>Carregando...</div>
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <Clock className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Carregando conclusões...</p>
+            </div>
+          </div>
+        ) : completions.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <FileText className="h-12 w-12 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Nenhuma conclusão encontrada</p>
+            </div>
+          </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Agente</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Notas</TableHead>
-                <TableHead>Links</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <ScrollArea className="h-[calc(85vh-180px)] pr-4">
+            <div className="space-y-4">
               {completions.map((completion) => (
-                <TableRow key={completion.id}>
-                  <TableCell>{completion.profiles.name}</TableCell>
-                  <TableCell>
-                    {format(new Date(completion.completed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">{completion.notes || '-'}</TableCell>
-                  <TableCell className="max-w-xs">
-                    {completion.links ? (
-                      <div className="flex flex-col gap-1">
-                        {completion.links.split('\n').filter(link => link.trim()).map((link, idx) => (
-                          <a
-                            key={idx}
-                            href={link.trim()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline truncate text-sm"
-                          >
-                            {link.trim()}
-                          </a>
-                        ))}
+                <Card key={completion.id} className="p-6 hover:shadow-md transition-shadow">
+                  <div className="space-y-4">
+                    {/* Header with agent info and status */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-base truncate">{completion.profiles.name}</h4>
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{format(new Date(completion.completed_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span>
+                          </div>
+                        </div>
                       </div>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        completion.status === 'approved'
-                          ? 'default'
+                      <Badge
+                        variant={
+                          completion.status === 'approved'
+                            ? 'default'
+                            : completion.status === 'rejected'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                        className="shrink-0"
+                      >
+                        {completion.status === 'approved'
+                          ? 'Aprovada'
                           : completion.status === 'rejected'
-                          ? 'destructive'
-                          : 'secondary'
-                      }
-                    >
-                      {completion.status === 'approved'
-                        ? 'Aprovada'
-                        : completion.status === 'rejected'
-                        ? 'Rejeitada'
-                        : 'Pendente'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
+                          ? 'Rejeitada'
+                          : 'Pendente'}
+                      </Badge>
+                    </div>
+
+                    {/* Notes section */}
+                    {completion.notes && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span>Notas</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground pl-6 whitespace-pre-wrap">
+                          {completion.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Links section */}
+                    {completion.links && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                          <span>Links</span>
+                        </div>
+                        <div className="flex flex-col gap-2 pl-6">
+                          {completion.links.split('\n').filter(link => link.trim()).map((link, idx) => (
+                            <a
+                              key={idx}
+                              href={link.trim()}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary hover:underline break-all flex items-start gap-2"
+                            >
+                              <LinkIcon className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                              {link.trim()}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
                     {completion.status === 'pending' && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-3 pt-2">
                         <Button
-                          size="sm"
-                          variant="outline"
+                          className="flex-1"
+                          variant="default"
                           onClick={() => handleApprove(completion.id)}
                         >
-                          <CheckCircle className="h-4 w-4 mr-1" />
+                          <CheckCircle className="h-4 w-4 mr-2" />
                           Aprovar
                         </Button>
                         <Button
-                          size="sm"
+                          className="flex-1"
                           variant="outline"
                           onClick={() => handleReject(completion.id)}
                         >
-                          <XCircle className="h-4 w-4 mr-1" />
+                          <XCircle className="h-4 w-4 mr-2" />
                           Rejeitar
                         </Button>
                       </div>
                     )}
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </ScrollArea>
         )}
       </DialogContent>
     </Dialog>
