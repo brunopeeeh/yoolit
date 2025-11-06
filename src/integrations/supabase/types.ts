@@ -267,6 +267,70 @@ export type Database = {
         }
         Relationships: []
       }
+      swap_credits: {
+        Row: {
+          created_at: string
+          creditor_id: string
+          debtor_id: string
+          id: string
+          notes: string | null
+          redeemed_at: string | null
+          scheduled_payment_date: string | null
+          scheduled_payment_time: string | null
+          status: string
+          swap_request_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creditor_id: string
+          debtor_id: string
+          id?: string
+          notes?: string | null
+          redeemed_at?: string | null
+          scheduled_payment_date?: string | null
+          scheduled_payment_time?: string | null
+          status?: string
+          swap_request_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creditor_id?: string
+          debtor_id?: string
+          id?: string
+          notes?: string | null
+          redeemed_at?: string | null
+          scheduled_payment_date?: string | null
+          scheduled_payment_time?: string | null
+          status?: string
+          swap_request_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swap_credits_creditor_id_fkey"
+            columns: ["creditor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swap_credits_debtor_id_fkey"
+            columns: ["debtor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swap_credits_swap_request_id_fkey"
+            columns: ["swap_request_id"]
+            isOneToOne: false
+            referencedRelation: "shift_swap_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null

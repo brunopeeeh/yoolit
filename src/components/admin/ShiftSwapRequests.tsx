@@ -5,13 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowRight, Plus, X, Check, Trash2 } from 'lucide-react';
+import { ArrowRight, Plus, X, Check, Trash2, Wallet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NewSwapRequestDialog } from './NewSwapRequestDialog';
+import { PreApprovalDialog } from './PreApprovalDialog';
 import { useRoles } from '@/hooks/useRoles';
+
+interface SwapCredit {
+  id: string;
+  creditor_id: string;
+  debtor_id: string;
+  status: 'pending' | 'scheduled' | 'redeemed';
+  scheduled_payment_date: string | null;
+  scheduled_payment_time: string | null;
+  created_at: string;
+  debtor?: {
+    name: string;
+  };
+  creditor?: {
+    name: string;
+  };
+}
 
 interface SwapRequest {
   id: string;
@@ -78,8 +95,14 @@ const statusBadgeConfig = {
   completed: { label: 'Concluída', className: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20' },
 };
 
-const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRequest; onUpdate: () => void; currentUserId: string | null }) => {
+const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: { 
+  request: SwapRequest; 
+  onUpdate: () => void; 
+  currentUserId: string | null;
+  swapCredits: SwapCredit[];
+}) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showPreApprovalDialog, setShowPreApprovalDialog] = useState(false);
   const { isAdmin, hasRole } = useRoles(currentUserId || undefined);
   
   const canDelete = currentUserId === request.requester.id || isAdmin;
@@ -92,10 +115,16 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
     ? 'pending_supervisor' 
     : request.status;
 
-  const handleTargetApprove = async () => {
+  // Count pending credits with the requester
+  const pendingCreditsCount = swapCredits.filter(
+    credit => credit.debtor_id === request.requester.id && credit.status === 'pending'
+  ).length;
+
+  const handleTargetApprove = async (paymentType: 'scheduled' | 'wallet', scheduledDate?: Date, scheduledTime?: string) => {
     setIsUpdating(true);
     try {
-      const { error } = await supabase
+      // Update swap request with pre-approval
+      const { error: swapError } = await supabase
         .from('shift_swap_requests')
         .update({ 
           target_approved: true,
@@ -103,12 +132,37 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
         })
         .eq('id', request.id);
 
-      if (error) throw error;
-      toast.success('Troca pré-aprovada! Aguardando supervisor.');
+      if (swapError) throw swapError;
+
+      // Create swap credit record
+      const creditData: any = {
+        creditor_id: request.target.id,
+        debtor_id: request.requester.id,
+        swap_request_id: request.id,
+        status: paymentType === 'scheduled' ? 'scheduled' : 'pending'
+      };
+
+      if (paymentType === 'scheduled' && scheduledDate && scheduledTime) {
+        creditData.scheduled_payment_date = format(scheduledDate, 'yyyy-MM-dd');
+        creditData.scheduled_payment_time = scheduledTime;
+      }
+
+      const { error: creditError } = await supabase
+        .from('swap_credits')
+        .insert(creditData);
+
+      if (creditError) throw creditError;
+
+      const message = paymentType === 'wallet' 
+        ? 'Troca pré-aprovada e adicionada ao seu saldo!' 
+        : 'Troca pré-aprovada e pagamento agendado!';
+      
+      toast.success(message);
+      setShowPreApprovalDialog(false);
       onUpdate();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving as target:', error);
-      toast.error('Erro ao pré-aprovar solicitação');
+      toast.error(error.message || 'Erro ao pré-aprovar solicitação');
     } finally {
       setIsUpdating(false);
     }
@@ -295,7 +349,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
               <Button
                 size="sm"
                 className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
-                onClick={handleTargetApprove}
+                onClick={() => setShowPreApprovalDialog(true)}
                 disabled={isUpdating}
               >
                 <Check className="h-4 w-4 mr-2" />
@@ -356,7 +410,23 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
             </AlertDialog>
           )}
         </div>
+
+        {pendingCreditsCount > 0 && isTarget && (
+          <div className="mt-4 pt-4 border-t flex items-center gap-2 text-sm text-muted-foreground">
+            <Wallet className="h-4 w-4" />
+            <span>
+              {request.requester.name} tem {pendingCreditsCount} {pendingCreditsCount === 1 ? 'crédito pendente' : 'créditos pendentes'} com você
+            </span>
+          </div>
+        )}
       </CardContent>
+
+      <PreApprovalDialog
+        open={showPreApprovalDialog}
+        onOpenChange={setShowPreApprovalDialog}
+        onConfirm={handleTargetApprove}
+        isLoading={isUpdating}
+      />
     </Card>
   );
 };
@@ -367,6 +437,7 @@ interface ShiftSwapRequestsProps {
 
 export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProps) => {
   const [requests, setRequests] = useState<SwapRequest[]>([]);
+  const [swapCredits, setSwapCredits] = useState<SwapCredit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgent, setFilterAgent] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'mine' | 'supervisor' | 'agent'>('pending');
@@ -380,6 +451,46 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
     };
     fetchCurrentUser();
   }, []);
+
+  const fetchSwapCredits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('swap_credits')
+        .select(`
+          id,
+          creditor_id,
+          debtor_id,
+          status,
+          scheduled_payment_date,
+          scheduled_payment_time,
+          created_at,
+          creditor:profiles!swap_credits_creditor_id_fkey(name),
+          debtor:profiles!swap_credits_debtor_id_fkey(name)
+        `)
+        .or(`creditor_id.eq.${user.id},debtor_id.eq.${user.id}`);
+
+      if (error) throw error;
+
+      const credits: SwapCredit[] = (data || []).map((credit: any) => ({
+        id: credit.id,
+        creditor_id: credit.creditor_id,
+        debtor_id: credit.debtor_id,
+        status: credit.status,
+        scheduled_payment_date: credit.scheduled_payment_date,
+        scheduled_payment_time: credit.scheduled_payment_time,
+        created_at: credit.created_at,
+        creditor: credit.creditor || { name: 'Usuário desconhecido' },
+        debtor: credit.debtor || { name: 'Usuário desconhecido' },
+      }));
+
+      setSwapCredits(credits);
+    } catch (error) {
+      console.error('Error fetching swap credits:', error);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -475,6 +586,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
 
   useEffect(() => {
     fetchRequests();
+    fetchSwapCredits();
   }, [filterStatus]);
 
   // Setup realtime subscription for shift swap requests
@@ -597,6 +709,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -620,6 +733,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -643,6 +757,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -666,6 +781,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -689,6 +805,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -712,6 +829,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
@@ -735,6 +853,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   request={request} 
                   onUpdate={fetchRequests}
                   currentUserId={currentUserId}
+                  swapCredits={swapCredits}
                 />
               ))}
             </div>
