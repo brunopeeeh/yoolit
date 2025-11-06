@@ -128,21 +128,24 @@ const AgentRow = ({ agent }: { agent: AgentShift }) => {
 };
 
 const TimeAxis = () => {
-  const hours = Array.from({ length: 13 }, (_, i) => i * 2);
+  const hours = Array.from({ length: 12 }, (_, i) => i * 2);
   
   return (
     <div className="flex items-center gap-4 mb-2">
       <div className="w-40 flex-shrink-0" />
-      <div className="flex-1 relative h-8">
+      <div className="flex-1 relative h-8 pr-8">
         {hours.map((hour) => (
           <div
             key={hour}
-            className="absolute text-xs text-muted-foreground"
+            className="absolute text-xs text-muted-foreground -translate-x-1/2"
             style={{ left: `${(hour / 24) * 100}%` }}
           >
             {hour.toString().padStart(2, '0')}:00
           </div>
         ))}
+        <div className="absolute text-xs text-muted-foreground right-0">
+          24:00
+        </div>
       </div>
     </div>
   );
