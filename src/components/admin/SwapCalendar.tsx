@@ -218,7 +218,7 @@ export const SwapCalendar = () => {
             </div>
 
             {/* Calendário */}
-            <div className="lg:col-span-2 flex justify-center items-start">
+            <div className="lg:col-span-2 flex justify-center items-start w-full">
               <Calendar
                 mode="single"
                 selected={date}
@@ -229,7 +229,15 @@ export const SwapCalendar = () => {
                 locale={ptBR}
                 modifiers={modifiers}
                 modifiersClassNames={modifiersClassNames}
-                className="rounded-md border p-4"
+                className="rounded-md border p-6 w-full"
+                classNames={{
+                  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
+                  month: "space-y-4 w-full",
+                  table: "w-full border-collapse space-y-1",
+                  head_cell: "text-muted-foreground rounded-md w-14 font-normal text-sm",
+                  cell: "h-14 w-14 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                  day: "h-14 w-14 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+                }}
               />
             </div>
           </div>
