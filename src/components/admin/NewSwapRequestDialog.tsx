@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { z } from 'zod';
-import { Calendar, Clock, User, CalendarIcon } from 'lucide-react';
+import { Calendar, Clock, User, CalendarIcon, Wallet } from 'lucide-react';
 import { getDayOfWeekName } from '@/lib/shiftUtils';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +42,13 @@ const swapRequestSchema = z.object({
 
 type SwapRequestForm = z.infer<typeof swapRequestSchema>;
 
+interface SwapCredit {
+  id: string;
+  debtor_id: string;
+  debtor?: { name: string };
+  created_at: string;
+}
+
 export const NewSwapRequestDialog = ({ 
   open, 
   onOpenChange,
@@ -60,12 +67,15 @@ export const NewSwapRequestDialog = ({
   const [reason, setReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof SwapRequestForm, string>>>({});
+  const [swapCredits, setSwapCredits] = useState<SwapCredit[]>([]);
+  const [useCredit, setUseCredit] = useState(false);
 
   // Buscar dados iniciais
   useEffect(() => {
     if (open) {
       fetchAgents();
       fetchAgentSchedules();
+      fetchSwapCredits();
     }
   }, [open]);
 
@@ -145,6 +155,30 @@ export const NewSwapRequestDialog = ({
     }
   };
 
+  const fetchSwapCredits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: credits, error } = await supabase
+        .from('swap_credits')
+        .select(`
+          id,
+          debtor_id,
+          created_at,
+          debtor:profiles!swap_credits_debtor_id_fkey(name)
+        `)
+        .eq('creditor_id', user.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSwapCredits(credits || []);
+    } catch (error) {
+      console.error('Error fetching swap credits:', error);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       if (!selectedDate || !myScheduleForDate || !targetScheduleForDate) {
@@ -180,21 +214,52 @@ export const NewSwapRequestDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { error } = await supabase
+      // Se usar crédito, marca como pré-aprovado
+      const insertData: any = {
+        requester_id: user.id,
+        target_id: selectedAgent,
+        swap_date: format(selectedDate, 'yyyy-MM-dd'),
+        requester_schedule_id: myScheduleForDate.id,
+        target_schedule_id: targetScheduleForDate.id,
+        reason: reason.trim(),
+        status: 'pending'
+      };
+
+      if (useCredit) {
+        insertData.target_approved = true;
+        insertData.target_approved_at = new Date().toISOString();
+      }
+
+      const { data: newRequest, error } = await supabase
         .from('shift_swap_requests')
-        .insert({
-          requester_id: user.id,
-          target_id: selectedAgent,
-          swap_date: format(selectedDate, 'yyyy-MM-dd'),
-          requester_schedule_id: myScheduleForDate.id,
-          target_schedule_id: targetScheduleForDate.id,
-          reason: reason.trim(),
-          status: 'pending'
-        });
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast.success('Solicitação criada com sucesso');
+      // Se usar crédito, atualizar o crédito para 'redeemed'
+      if (useCredit && swapCredits.length > 0) {
+        const creditToUse = swapCredits.find(c => c.debtor_id === selectedAgent);
+        if (creditToUse) {
+          const { error: creditError } = await supabase
+            .from('swap_credits')
+            .update({ 
+              status: 'redeemed',
+              redeemed_at: new Date().toISOString()
+            })
+            .eq('id', creditToUse.id);
+
+          if (creditError) {
+            console.error('Error updating credit:', creditError);
+          }
+        }
+      }
+
+      toast.success(useCredit 
+        ? 'Solicitação criada usando ponto de troca! Aguardando aprovação do supervisor.' 
+        : 'Solicitação criada com sucesso'
+      );
       
       // Resetar formulário
       setSelectedDate(undefined);
@@ -202,6 +267,7 @@ export const NewSwapRequestDialog = ({
       setReason('');
       setMyScheduleForDate(null);
       setTargetScheduleForDate(null);
+      setUseCredit(false);
       
       onOpenChange(false);
       onSuccess();
@@ -224,6 +290,37 @@ export const NewSwapRequestDialog = ({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Aviso de créditos disponíveis */}
+          {swapCredits.length > 0 && (
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg space-y-3">
+              <div className="flex items-start gap-3">
+                <Wallet className="h-5 w-5 text-emerald-600 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-semibold text-emerald-900">
+                    Você tem {swapCredits.length} ponto{swapCredits.length > 1 ? 's' : ''} de troca disponível{swapCredits.length > 1 ? 'eis' : ''}!
+                  </h4>
+                  <p className="text-sm text-emerald-700 mt-1">
+                    {swapCredits.map(credit => credit.debtor?.name).join(', ')} deve{swapCredits.length === 1 ? '' : 'm'} uma troca para você.
+                  </p>
+                  {selectedAgent && swapCredits.some(c => c.debtor_id === selectedAgent) && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="use-credit"
+                        checked={useCredit}
+                        onChange={(e) => setUseCredit(e.target.checked)}
+                        className="h-4 w-4 text-emerald-600 rounded border-emerald-300 focus:ring-emerald-500"
+                      />
+                      <label htmlFor="use-credit" className="text-sm font-medium text-emerald-900 cursor-pointer">
+                        Usar ponto de troca com {agents.find(a => a.id === selectedAgent)?.name} (pré-aprovação automática)
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Data - PRIMEIRO */}
           <div className="space-y-2">
             <Label htmlFor="swap-date">
