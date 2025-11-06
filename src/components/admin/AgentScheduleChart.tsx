@@ -174,6 +174,7 @@ const CurrentTimeLine = () => {
 
 export const AgentScheduleChart = () => {
   const [selectedShift, setSelectedShift] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState('day');
   const [agents, setAgents] = useState<AgentShift[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -216,7 +217,7 @@ export const AgentScheduleChart = () => {
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(statusChangesChannel);
     };
-  }, []);
+  }, [selectedPeriod]);
 
   const fetchAgentData = async () => {
     try {
@@ -230,14 +231,39 @@ export const AgentScheduleChart = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch today's status changes for all users
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Calculate start date based on selected period
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch (selectedPeriod) {
+        case '12h':
+          startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+          break;
+        case '24h':
+          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          break;
+        case 'day':
+          startDate = new Date(now);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 7);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'month':
+          startDate = new Date(now);
+          startDate.setMonth(now.getMonth() - 1);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        default:
+          startDate.setHours(0, 0, 0, 0);
+      }
       
       const { data: statusChanges, error: changesError } = await supabase
         .from('status_changes')
         .select('*')
-        .gte('created_at', today.toISOString())
+        .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: true });
 
       if (changesError) throw changesError;
@@ -259,11 +285,22 @@ export const AgentScheduleChart = () => {
     }
   };
 
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case '12h': return 'Últimas 12 horas';
+      case '24h': return 'Últimas 24 horas';
+      case 'day': return 'Hoje';
+      case 'week': return 'Última semana';
+      case 'month': return 'Último mês';
+      default: return 'Hoje';
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Escala de Agentes - Hoje</CardTitle>
+          <CardTitle>Escala de Agentes - {getPeriodLabel()}</CardTitle>
           <CardDescription>Carregando dados...</CardDescription>
         </CardHeader>
         <CardContent>
@@ -280,20 +317,34 @@ export const AgentScheduleChart = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Escala de Agentes - Hoje</CardTitle>
+            <CardTitle>Escala de Agentes - {getPeriodLabel()}</CardTitle>
             <CardDescription>Visualização dos horários de trabalho dos agentes</CardDescription>
           </div>
-          <Select value={selectedShift} onValueChange={setSelectedShift}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Selecione o turno" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os turnos</SelectItem>
-              <SelectItem value="morning">Manhã</SelectItem>
-              <SelectItem value="afternoon">Tarde</SelectItem>
-              <SelectItem value="night">Noite</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="12h">Últimas 12h</SelectItem>
+                <SelectItem value="24h">Últimas 24h</SelectItem>
+                <SelectItem value="day">Dia</SelectItem>
+                <SelectItem value="week">Semana</SelectItem>
+                <SelectItem value="month">Mês</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedShift} onValueChange={setSelectedShift}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Turno" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os turnos</SelectItem>
+                <SelectItem value="morning">Manhã</SelectItem>
+                <SelectItem value="afternoon">Tarde</SelectItem>
+                <SelectItem value="night">Noite</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
