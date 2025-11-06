@@ -333,17 +333,6 @@ export const AgentScheduleChart = () => {
                 <SelectItem value="month">Mês</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedShift} onValueChange={setSelectedShift}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Turno" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os turnos</SelectItem>
-                <SelectItem value="morning">Manhã</SelectItem>
-                <SelectItem value="afternoon">Tarde</SelectItem>
-                <SelectItem value="night">Noite</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </CardHeader>
