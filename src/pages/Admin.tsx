@@ -19,8 +19,9 @@ const Admin = () => {
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
-  const activeTab = searchParams.get('tab') || 'dashboard';
+  const { isAdmin, hasRole, isLoading: rolesLoading } = useRoles(user?.id);
+  const isAgent = hasRole('agent');
+  const activeTab = searchParams.get('tab') || (isAgent && !isAdmin ? 'swap-requests' : 'dashboard');
   const [dashboardData, setDashboardData] = useState({
     availableAgents: 6,
     totalAgents: 13,
@@ -112,55 +113,67 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 max-w-[1000px]">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Dashboard Supervisor
-            </TabsTrigger>
+          <TabsList className={isAgent && !isAdmin ? "grid w-full max-w-[300px]" : "grid w-full grid-cols-5 max-w-[1000px]"}>
+            {!isAgent || isAdmin ? (
+              <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Dashboard Supervisor
+              </TabsTrigger>
+            ) : null}
             <TabsTrigger value="swap-requests" className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
               Solicitações de Troca
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Agentes
-            </TabsTrigger>
-            <TabsTrigger value="shifts" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Escalas
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              Histórico
-            </TabsTrigger>
+            {!isAgent || isAdmin ? (
+              <>
+                <TabsTrigger value="users" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Agentes
+                </TabsTrigger>
+                <TabsTrigger value="shifts" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Escalas
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Histórico
+                </TabsTrigger>
+              </>
+            ) : null}
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6 space-y-6">
-            <DashboardStats
-              availableAgents={dashboardData.availableAgents}
-              totalAgents={dashboardData.totalAgents}
-              pendingSwaps={dashboardData.pendingSwaps}
-              approvedSwaps={dashboardData.approvedSwaps}
-              coverage={dashboardData.coverage}
-            />
-            <AgentScheduleChart />
-          </TabsContent>
+          {!isAgent || isAdmin ? (
+            <TabsContent value="dashboard" className="mt-6 space-y-6">
+              <DashboardStats
+                availableAgents={dashboardData.availableAgents}
+                totalAgents={dashboardData.totalAgents}
+                pendingSwaps={dashboardData.pendingSwaps}
+                approvedSwaps={dashboardData.approvedSwaps}
+                coverage={dashboardData.coverage}
+              />
+              <AgentScheduleChart />
+            </TabsContent>
+          ) : null}
 
           <TabsContent value="swap-requests" className="mt-6">
-            <ShiftSwapRequests />
+            <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />
           </TabsContent>
 
-          <TabsContent value="users" className="mt-6">
-            <UserManagement />
-          </TabsContent>
+          {!isAgent || isAdmin ? (
+            <>
+              <TabsContent value="users" className="mt-6">
+                <UserManagement />
+              </TabsContent>
 
-          <TabsContent value="shifts" className="mt-6">
-            <AgentWeeklySchedule />
-          </TabsContent>
+              <TabsContent value="shifts" className="mt-6">
+                <AgentWeeklySchedule />
+              </TabsContent>
 
-          <TabsContent value="history" className="mt-6">
-            <StatusHistory />
-          </TabsContent>
+              <TabsContent value="history" className="mt-6">
+                <StatusHistory />
+              </TabsContent>
+            </>
+          ) : null}
         </Tabs>
       </main>
     </div>

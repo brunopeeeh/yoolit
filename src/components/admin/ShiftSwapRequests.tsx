@@ -243,7 +243,11 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
   );
 };
 
-export const ShiftSwapRequests = () => {
+interface ShiftSwapRequestsProps {
+  isAgentView?: boolean;
+}
+
+export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProps) => {
   const [requests, setRequests] = useState<SwapRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgent, setFilterAgent] = useState<string>('all');
@@ -428,14 +432,18 @@ export const ShiftSwapRequests = () => {
         onValueChange={(value) => setFilterStatus(value as typeof filterStatus)} 
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-7 max-w-4xl">
+        <TabsList className={isAgentView ? "grid w-full grid-cols-4 max-w-2xl" : "grid w-full grid-cols-7 max-w-4xl"}>
           <TabsTrigger value="pending">Pendentes</TabsTrigger>
           <TabsTrigger value="approved">Aprovadas</TabsTrigger>
           <TabsTrigger value="rejected">Recusadas</TabsTrigger>
           <TabsTrigger value="mine">Minhas Solicitações</TabsTrigger>
-          <TabsTrigger value="supervisor">Supervisor</TabsTrigger>
-          <TabsTrigger value="agent">Agente</TabsTrigger>
-          <TabsTrigger value="all">Todas</TabsTrigger>
+          {!isAgentView && (
+            <>
+              <TabsTrigger value="supervisor">Supervisor</TabsTrigger>
+              <TabsTrigger value="agent">Agente</TabsTrigger>
+              <TabsTrigger value="all">Todas</TabsTrigger>
+            </>
+          )}
         </TabsList>
 
         <TabsContent value="pending" className="mt-6">
