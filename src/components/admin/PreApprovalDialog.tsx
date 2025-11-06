@@ -14,26 +14,31 @@ import { TimeInput } from './TimeInput';
 interface PreApprovalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (paymentType: 'scheduled' | 'wallet', scheduledDate?: Date, scheduledTime?: string) => void;
+  onConfirm: (paymentType: 'scheduled' | 'wallet', scheduledDate?: Date, startTime?: string, endTime?: string) => void;
   isLoading?: boolean;
 }
 
 export const PreApprovalDialog = ({ open, onOpenChange, onConfirm, isLoading }: PreApprovalDialogProps) => {
   const [paymentType, setPaymentType] = useState<'scheduled' | 'wallet'>('wallet');
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [errors, setErrors] = useState<{ date?: string; time?: string }>({});
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [errors, setErrors] = useState<{ date?: string; startTime?: string; endTime?: string }>({});
 
   const handleConfirm = () => {
     if (paymentType === 'scheduled') {
-      const newErrors: { date?: string; time?: string } = {};
+      const newErrors: { date?: string; startTime?: string; endTime?: string } = {};
       
       if (!selectedDate) {
         newErrors.date = 'Selecione uma data';
       }
       
-      if (!selectedTime) {
-        newErrors.time = 'Selecione um horário';
+      if (!startTime) {
+        newErrors.startTime = 'Selecione o horário inicial';
+      }
+      
+      if (!endTime) {
+        newErrors.endTime = 'Selecione o horário final';
       }
       
       if (Object.keys(newErrors).length > 0) {
@@ -42,13 +47,14 @@ export const PreApprovalDialog = ({ open, onOpenChange, onConfirm, isLoading }: 
       }
     }
     
-    onConfirm(paymentType, selectedDate, selectedTime);
+    onConfirm(paymentType, selectedDate, startTime, endTime);
   };
 
   const handleClose = () => {
     setPaymentType('wallet');
     setSelectedDate(undefined);
-    setSelectedTime('');
+    setStartTime('');
+    setEndTime('');
     setErrors({});
     onOpenChange(false);
   };
@@ -128,13 +134,23 @@ export const PreApprovalDialog = ({ open, onOpenChange, onConfirm, isLoading }: 
               </div>
 
               <TimeInput
-                label="Horário do pagamento"
-                value={selectedTime}
+                label="Horário inicial"
+                value={startTime}
                 onChange={(value) => {
-                  setSelectedTime(value);
-                  setErrors((prev) => ({ ...prev, time: undefined }));
+                  setStartTime(value);
+                  setErrors((prev) => ({ ...prev, startTime: undefined }));
                 }}
-                error={errors.time}
+                error={errors.startTime}
+              />
+
+              <TimeInput
+                label="Horário final"
+                value={endTime}
+                onChange={(value) => {
+                  setEndTime(value);
+                  setErrors((prev) => ({ ...prev, endTime: undefined }));
+                }}
+                error={errors.endTime}
               />
             </div>
           )}
