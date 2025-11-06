@@ -38,7 +38,9 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
+  const { isAdmin, hasRole, isLoading: rolesLoading } = useRoles(user?.id);
+  const isAgent = hasRole('agent');
+  const hasAdminAccess = isAdmin || isAgent;
 
   useEffect(() => {
     console.log('Header - User:', user?.id);
@@ -63,7 +65,7 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
         </div>
         
         <div className="flex items-center gap-2">
-          {isAdmin && (
+          {hasAdminAccess && (
             <Button
               size="icon"
               variant="ghost"
@@ -72,7 +74,7 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
                 if (location.pathname === '/admin') {
                   navigate('/');
                 } else {
-                  navigate('/admin?tab=dashboard');
+                  navigate(isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard');
                 }
               }}
               title={location.pathname === '/admin' ? 'Voltar ao Chat' : 'Painel Administrativo'}
