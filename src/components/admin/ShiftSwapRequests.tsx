@@ -85,6 +85,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
   const canDelete = currentUserId === request.requester.id || isAdmin;
   const isTarget = currentUserId === request.target.id;
   const isSupervisor = hasRole('supervisor');
+  const canSupervisorApprove = isAdmin || isSupervisor;
   
   // Determine display status
   const displayStatus = request.status === 'pending' && request.target_approved 
@@ -303,7 +304,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
             </>
           )}
           
-          {request.status === 'pending' && request.target_approved && isSupervisor && (
+          {request.status === 'pending' && request.target_approved && canSupervisorApprove && (
             <>
               <Button
                 variant="outline"
@@ -503,6 +504,8 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
         (payload) => {
           const newStatus = (payload.new as any).status;
           const oldStatus = (payload.old as any).status;
+          const newTargetApproved = (payload.new as any).target_approved;
+          const oldTargetApproved = (payload.old as any).target_approved;
           
           if (newStatus !== oldStatus) {
             console.log('Status da solicitação atualizado:', payload);
@@ -517,6 +520,10 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
               toast.info('Solicitação cancelada');
             }
             
+            fetchRequests();
+          } else if (newTargetApproved !== oldTargetApproved && newTargetApproved === true) {
+            console.log('Solicitação pré-aprovada pelo agente:', payload);
+            toast.info('Solicitação pré-aprovada pelo agente destinatário');
             fetchRequests();
           }
         }
