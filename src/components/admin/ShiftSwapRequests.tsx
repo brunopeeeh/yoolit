@@ -120,7 +120,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: {
     credit => credit.debtor_id === request.requester.id && credit.status === 'pending'
   ).length;
 
-  const handleTargetApprove = async (paymentType: 'scheduled' | 'wallet', scheduledDate?: Date, scheduledTime?: string) => {
+  const handleTargetApprove = async (paymentType: 'scheduled' | 'wallet', scheduledDate?: Date, startTime?: string, endTime?: string) => {
     setIsUpdating(true);
     try {
       // Update swap request with pre-approval
@@ -142,9 +142,46 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: {
         status: paymentType === 'scheduled' ? 'scheduled' : 'pending'
       };
 
-      if (paymentType === 'scheduled' && scheduledDate && scheduledTime) {
+      if (paymentType === 'scheduled' && scheduledDate && startTime && endTime) {
         creditData.scheduled_payment_date = format(scheduledDate, 'yyyy-MM-dd');
-        creditData.scheduled_payment_time = scheduledTime;
+        creditData.scheduled_payment_time = `${startTime}-${endTime}`;
+        
+        // Create new swap request for scheduled payment (pre-approved)
+        const newSwapData: any = {
+          requester_id: request.target.id, // Who is receiving the payment becomes the requester
+          target_id: request.requester.id, // Who owes becomes the target
+          reason: `Pagamento agendado da troca #${request.id.substring(0, 8)}`,
+          swap_date: format(scheduledDate, 'yyyy-MM-dd'),
+          target_approved: true,
+          target_approved_at: new Date().toISOString(),
+          status: 'pending'
+        };
+
+        // Get schedules for both users to populate the swap request
+        const { data: requesterSchedule } = await supabase
+          .from('agent_schedules')
+          .select('id, day_of_week, work_start_time, work_end_time')
+          .eq('user_id', request.target.id)
+          .single();
+
+        const { data: targetSchedule } = await supabase
+          .from('agent_schedules')
+          .select('id, day_of_week, work_start_time, work_end_time')
+          .eq('user_id', request.requester.id)
+          .single();
+
+        if (requesterSchedule) {
+          newSwapData.requester_schedule_id = requesterSchedule.id;
+        }
+        if (targetSchedule) {
+          newSwapData.target_schedule_id = targetSchedule.id;
+        }
+
+        const { error: newSwapError } = await supabase
+          .from('shift_swap_requests')
+          .insert(newSwapData);
+
+        if (newSwapError) throw newSwapError;
       }
 
       const { error: creditError } = await supabase
@@ -155,7 +192,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: {
 
       const message = paymentType === 'wallet' 
         ? 'Troca pré-aprovada e adicionada ao seu saldo!' 
-        : 'Troca pré-aprovada e pagamento agendado!';
+        : 'Troca pré-aprovada e nova solicitação criada para o pagamento agendado!';
       
       toast.success(message);
       setShowPreApprovalDialog(false);
