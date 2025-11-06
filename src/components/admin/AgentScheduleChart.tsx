@@ -236,6 +236,9 @@ export const AgentScheduleChart = () => {
       let startDate = new Date();
       
       switch (selectedPeriod) {
+        case '6h':
+          startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+          break;
         case '12h':
           startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
           break;
@@ -287,6 +290,7 @@ export const AgentScheduleChart = () => {
 
   const getPeriodLabel = () => {
     switch (selectedPeriod) {
+      case '6h': return 'Últimas 6 horas';
       case '12h': return 'Últimas 12 horas';
       case '24h': return 'Últimas 24 horas';
       case 'day': return 'Hoje';
@@ -326,6 +330,7 @@ export const AgentScheduleChart = () => {
                 <SelectValue placeholder="Período" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="6h">Últimas 6h</SelectItem>
                 <SelectItem value="12h">Últimas 12h</SelectItem>
                 <SelectItem value="24h">Últimas 24h</SelectItem>
                 <SelectItem value="day">Dia</SelectItem>
