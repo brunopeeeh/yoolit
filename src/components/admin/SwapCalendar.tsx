@@ -3,11 +3,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CalendarDays, Clock, User } from 'lucide-react';
+import { CalendarDays, Clock, User, ArrowLeftRight, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 
 interface SwapRequest {
   id: string;
@@ -37,6 +37,7 @@ interface SwapRequest {
 
 export const SwapCalendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [month, setMonth] = useState<Date>(new Date());
   const [swaps, setSwaps] = useState<SwapRequest[]>([]);
   const [selectedDaySwaps, setSelectedDaySwaps] = useState<SwapRequest[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -44,6 +45,21 @@ export const SwapCalendar = () => {
   useEffect(() => {
     fetchSwaps();
   }, []);
+
+  const monthStats = {
+    total: swaps.filter(s => {
+      const swapDate = new Date(s.swap_date);
+      return swapDate >= startOfMonth(month) && swapDate <= endOfMonth(month);
+    }).length,
+    pending: swaps.filter(s => {
+      const swapDate = new Date(s.swap_date);
+      return s.status === 'pending' && swapDate >= startOfMonth(month) && swapDate <= endOfMonth(month);
+    }).length,
+    approved: swaps.filter(s => {
+      const swapDate = new Date(s.swap_date);
+      return s.status === 'approved' && swapDate >= startOfMonth(month) && swapDate <= endOfMonth(month);
+    }).length,
+  };
 
   const fetchSwaps = async () => {
     const { data, error } = await supabase
@@ -105,97 +121,231 @@ export const SwapCalendar = () => {
   };
 
   const modifiersClassNames = {
-    hasSwaps: 'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full',
+    hasSwaps: 'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full font-semibold',
   };
 
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
-            Calendário de Trocas
-          </CardTitle>
-          <CardDescription>
-            Clique nos dias marcados para ver os detalhes das trocas
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5" />
+                Calendário de Trocas de Turno
+              </CardTitle>
+              <CardDescription>
+                Visualização completa das trocas agendadas - Clique nos dias marcados para detalhes
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDayClick}
-            onDayClick={handleDayClick}
-            locale={ptBR}
-            modifiers={modifiers}
-            modifiersClassNames={modifiersClassNames}
-            className="rounded-md border"
-          />
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Estatísticas do Mês */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Estatísticas do Mês
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">Total de Trocas</span>
+                    </div>
+                    <Badge variant="secondary" className="font-semibold">
+                      {monthStats.total}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm">Pendentes</span>
+                    </div>
+                    <Badge variant="outline" className="font-semibold">
+                      {monthStats.pending}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Aprovadas</span>
+                    </div>
+                    <Badge variant="default" className="font-semibold">
+                      {monthStats.approved}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legenda */}
+              <div className="space-y-3 pt-4 border-t">
+                <h3 className="text-sm font-semibold">Legenda</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-primary"></div>
+                    <span className="text-muted-foreground">Dias com trocas agendadas</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Clique para ver detalhes</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Próximas Trocas */}
+              <div className="space-y-3 pt-4 border-t">
+                <h3 className="text-sm font-semibold">Próximas Trocas</h3>
+                <div className="space-y-2">
+                  {swaps
+                    .filter(s => new Date(s.swap_date) >= new Date())
+                    .slice(0, 3)
+                    .map(swap => (
+                      <div key={swap.id} className="p-2 rounded-lg bg-muted/30 text-xs">
+                        <div className="font-medium">{format(new Date(swap.swap_date), 'dd/MM/yyyy')}</div>
+                        <div className="text-muted-foreground truncate">
+                          {swap.requester.name} ↔ {swap.target.name}
+                        </div>
+                      </div>
+                    ))}
+                  {swaps.filter(s => new Date(s.swap_date) >= new Date()).length === 0 && (
+                    <p className="text-xs text-muted-foreground">Nenhuma troca agendada</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Calendário */}
+            <div className="lg:col-span-2 flex justify-center items-start">
+              <Calendar
+                mode="single"
+                selected={date}
+                month={month}
+                onMonthChange={setMonth}
+                onSelect={handleDayClick}
+                onDayClick={handleDayClick}
+                locale={ptBR}
+                modifiers={modifiers}
+                modifiersClassNames={modifiersClassNames}
+                className="rounded-md border p-4"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5" />
-              Trocas de {date && format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CalendarDays className="h-6 w-6" />
+              Detalhes das Trocas - {date && format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            {selectedDaySwaps.map((swap) => (
-              <Card key={swap.id}>
-                <CardHeader>
+            <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+              <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Total de trocas neste dia</p>
+                <p className="text-2xl font-bold">{selectedDaySwaps.length}</p>
+              </div>
+            </div>
+
+            {selectedDaySwaps.map((swap, index) => (
+              <Card key={swap.id} className="border-2">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                      Troca #{swap.id.substring(0, 8)}
-                    </CardTitle>
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="text-muted-foreground">#{index + 1}</span>
+                        Troca {swap.id.substring(0, 8)}
+                      </CardTitle>
+                      <CardDescription className="text-sm">{swap.reason}</CardDescription>
+                    </div>
                     {getStatusBadge(swap.status)}
                   </div>
-                  <CardDescription>{swap.reason}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Cabeçalho da Troca */}
+                  <div className="flex items-center justify-center gap-3 p-3 bg-muted/30 rounded-lg">
+                    <ArrowLeftRight className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Troca de Turno Entre Agentes
+                    </span>
+                  </div>
+
+                  {/* Detalhes dos Agentes */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <User className="h-4 w-4" />
-                        Solicitante
+                    {/* Solicitante */}
+                    <div className="space-y-3 p-4 rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/50">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">Solicitante</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{swap.requester.name}</p>
-                      {swap.requester_shift && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {swap.requester_shift.start_time} - {swap.requester_shift.end_time}
-                          <Badge variant="outline" className="ml-2">
-                            {swap.requester_shift.shift_type}
-                          </Badge>
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        <p className="font-medium text-base">{swap.requester.name}</p>
+                        {swap.requester_shift ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="font-mono">
+                                {swap.requester_shift.start_time} - {swap.requester_shift.end_time}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {swap.requester_shift.shift_type}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Turno não especificado</p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <User className="h-4 w-4" />
-                        Alvo
+                    {/* Alvo */}
+                    <div className="space-y-3 p-4 rounded-lg bg-green-50/50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/50">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="text-sm font-semibold text-green-900 dark:text-green-100">Alvo da Troca</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{swap.target.name}</p>
-                      {swap.target_shift && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {swap.target_shift.start_time} - {swap.target_shift.end_time}
-                          <Badge variant="outline" className="ml-2">
-                            {swap.target_shift.shift_type}
-                          </Badge>
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        <p className="font-medium text-base">{swap.target.name}</p>
+                        {swap.target_shift ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="font-mono">
+                                {swap.target_shift.start_time} - {swap.target_shift.end_time}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {swap.target_shift.shift_type}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Turno não especificado</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   <Separator />
 
-                  <div className="text-xs text-muted-foreground">
-                    Criada em: {format(new Date(swap.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  {/* Informações Adicionais */}
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground">Data da Solicitação</p>
+                      <p className="font-medium">
+                        {format(new Date(swap.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground">ID da Troca</p>
+                      <p className="font-mono font-medium">{swap.id.substring(0, 13)}...</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

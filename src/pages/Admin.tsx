@@ -147,10 +147,8 @@ const Admin = () => {
                 approvedSwaps={dashboardData.approvedSwaps}
                 coverage={dashboardData.coverage}
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <AgentScheduleChart />
-                <SwapCalendar />
-              </div>
+              <AgentScheduleChart />
+              <SwapCalendar />
             </TabsContent>
           ) : null}
 
