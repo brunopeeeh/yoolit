@@ -489,7 +489,7 @@ export const NewSwapRequestDialog = ({
               !targetScheduleForDate ||
               !reason.trim()
             }
-            className="bg-cyan-500 hover:bg-cyan-600"
+            className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
           >
             {isLoading ? 'Criando...' : 'Criar Solicitação'}
           </Button>

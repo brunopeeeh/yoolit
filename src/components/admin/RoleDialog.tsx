@@ -119,7 +119,7 @@ export const RoleDialog = ({ open, onOpenChange, user, onClose }: RoleDialogProp
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
+          <Button onClick={handleSave} disabled={isLoading} className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]">
             {isLoading ? 'Salvando...' : 'Salvar'}
           </Button>
         </DialogFooter>

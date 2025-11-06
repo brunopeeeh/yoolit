@@ -145,7 +145,7 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]">
               {isLoading ? 'Criando...' : 'Criar Recompensa'}
             </Button>
           </DialogFooter>

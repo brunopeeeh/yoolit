@@ -160,7 +160,7 @@ export const PreApprovalDialog = ({ open, onOpenChange, onConfirm, isLoading }: 
           <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} disabled={isLoading}>
+          <Button onClick={handleConfirm} disabled={isLoading} className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]">
             {isLoading ? 'Processando...' : 'Confirmar Pré-Aprovação'}
           </Button>
         </DialogFooter>

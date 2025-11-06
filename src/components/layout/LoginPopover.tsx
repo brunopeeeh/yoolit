@@ -269,7 +269,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                 disabled={isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
@@ -278,7 +278,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               <button
                 type="button"
                 onClick={() => setShowSignup(true)}
-                className="w-full text-sm text-primary hover:underline"
+                className="w-full text-sm text-[#0a639a] hover:underline"
               >
                 Não tem conta? Criar uma agora
               </button>
@@ -318,7 +318,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                 disabled={isLoading}
               >
                 {isLoading ? "Criando..." : "Criar Conta"}
@@ -327,7 +327,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               <button
                 type="button"
                 onClick={() => setShowSignup(false)}
-                className="w-full text-sm text-primary hover:underline"
+                className="w-full text-sm text-[#4169E1] hover:underline"
               >
                 Já tem conta? Fazer login
               </button>

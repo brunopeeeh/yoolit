@@ -385,7 +385,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: {
               </Button>
               <Button
                 size="sm"
-                className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
+                className="flex-1 bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                 onClick={() => setShowPreApprovalDialog(true)}
                 disabled={isUpdating}
               >
@@ -409,7 +409,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId, swapCredits }: {
               </Button>
               <Button
                 size="sm"
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                className="flex-1 bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                 onClick={handleSupervisorApprove}
                 disabled={isUpdating}
               >
@@ -697,7 +697,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
               <SelectItem value="all">Todos os agentes</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="bg-cyan-500 hover:bg-cyan-600" onClick={() => setShowNewDialog(true)}>
+          <Button className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]" onClick={() => setShowNewDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Solicitação
           </Button>

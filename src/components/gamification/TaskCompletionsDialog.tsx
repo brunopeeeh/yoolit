@@ -247,8 +247,7 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
                     {completion.status === 'pending' && (
                       <div className="flex gap-3 pt-2">
                         <Button
-                          className="flex-1"
-                          variant="default"
+                          className="flex-1 bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                           onClick={() => handleApprove(completion.id)}
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />

@@ -103,7 +103,7 @@ export const RewardsManagement = () => {
               <Button variant="outline" onClick={() => setShowPurchasesDialog(true)}>
                 Ver Compras
               </Button>
-              <Button onClick={() => setShowCreateDialog(true)}>
+              <Button onClick={() => setShowCreateDialog(true)} className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]">
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Recompensa
               </Button>

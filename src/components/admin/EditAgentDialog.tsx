@@ -409,7 +409,7 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
           </Button>
           <Button
             type="button"
-            className="bg-cyan-500 hover:bg-cyan-600"
+            className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

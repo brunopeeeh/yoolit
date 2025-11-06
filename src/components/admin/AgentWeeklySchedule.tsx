@@ -297,6 +297,7 @@ export const AgentWeeklySchedule = () => {
                 onClick={handleSave}
                 disabled={isSaving || isLoading}
                 size="lg"
+                className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
               >
                 {isSaving ? (
                   <>

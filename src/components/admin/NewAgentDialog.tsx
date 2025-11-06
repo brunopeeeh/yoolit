@@ -263,7 +263,7 @@ export const NewAgentDialog = ({ open, onOpenChange, onSuccess }: NewAgentDialog
             </Button>
             <Button
               type="submit"
-              className="bg-cyan-500 hover:bg-cyan-600"
+              className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Adicionando...' : 'Adicionar'}

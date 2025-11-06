@@ -130,7 +130,7 @@ export const AgentTasks = () => {
                     </div>
                     {!status && (
                       <Button
-                        className="w-full"
+                        className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                         onClick={() => setSelectedTask(task)}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />

@@ -105,7 +105,7 @@ export const UserManagement = () => {
             </div>
             <Button
               onClick={() => setIsNewAgentDialogOpen(true)}
-              className="bg-cyan-500 hover:bg-cyan-600"
+              className="bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
             >
               <UserPlus className="h-4 w-4 mr-2" />
               Adicionar Agente

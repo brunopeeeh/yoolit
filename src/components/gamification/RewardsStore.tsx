@@ -173,7 +173,7 @@ export const RewardsStore = () => {
                       )}
                     </div>
                     <Button
-                      className="w-full"
+                      className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                       onClick={() => handlePurchase(reward)}
                       disabled={!canAfford || !hasStock}
                     >

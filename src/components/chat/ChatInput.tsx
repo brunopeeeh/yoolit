@@ -69,7 +69,7 @@ const ChatInput = ({ onSendMessage, onClear, disabled = false, onCommand }: Chat
           type="submit"
           size="icon"
           disabled={!input.trim() || disabled}
-          className="h-9 w-9 sm:h-10 sm:w-10 rounded-full flex-shrink-0"
+          className="h-9 w-9 sm:h-10 sm:w-10 rounded-full flex-shrink-0 bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
         >
           <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </Button>
