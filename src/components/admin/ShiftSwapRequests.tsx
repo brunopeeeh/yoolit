@@ -427,7 +427,13 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
       if (filterStatus === 'mine') {
         // Mostrar apenas solicitações onde o usuário é requester ou target
         query = query.or(`requester_id.eq.${user.id},target_id.eq.${user.id}`);
-      } else if (filterStatus !== 'all' && filterStatus !== 'supervisor' && filterStatus !== 'agent') {
+      } else if (filterStatus === 'supervisor') {
+        // Mostrar solicitações aguardando aprovação do supervisor (pré-aprovadas pelo agente)
+        query = query.eq('status', 'pending').eq('target_approved', true);
+      } else if (filterStatus === 'agent') {
+        // Mostrar solicitações aguardando pré-aprovação do agente target
+        query = query.eq('status', 'pending').eq('target_approved', false).eq('target_id', user.id);
+      } else if (filterStatus !== 'all') {
         query = query.eq('status', filterStatus);
       }
 

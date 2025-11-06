@@ -40,7 +40,8 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
   const location = useLocation();
   const { isAdmin, hasRole, isLoading: rolesLoading } = useRoles(user?.id);
   const isAgent = hasRole('agent');
-  const hasAdminAccess = isAdmin || isAgent;
+  const isSupervisor = hasRole('supervisor');
+  const hasAdminAccess = isAdmin || isAgent || isSupervisor;
 
   useEffect(() => {
     console.log('Header - User:', user?.id);
