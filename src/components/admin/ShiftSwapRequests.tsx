@@ -4,12 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowRight, Plus, X, Check } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ArrowRight, Plus, X, Check, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NewSwapRequestDialog } from './NewSwapRequestDialog';
+import { useRoles } from '@/hooks/useRoles';
 
 interface SwapRequest {
   id: string;
@@ -73,8 +75,11 @@ const statusBadgeConfig = {
   completed: { label: 'Concluída', className: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20' },
 };
 
-const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate: () => void }) => {
+const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRequest; onUpdate: () => void; currentUserId: string | null }) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const { isAdmin } = useRoles(currentUserId || undefined);
+  
+  const canDelete = currentUserId === request.requester.id || isAdmin;
 
   const handleApprove = async () => {
     setIsUpdating(true);
@@ -117,6 +122,25 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
     } catch (error) {
       console.error('Error rejecting request:', error);
       toast.error('Erro ao recusar solicitação');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('shift_swap_requests')
+        .delete()
+        .eq('id', request.id);
+
+      if (error) throw error;
+      toast.success('Solicitação excluída');
+      onUpdate();
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      toast.error('Erro ao excluir solicitação');
     } finally {
       setIsUpdating(false);
     }
@@ -215,29 +239,59 @@ const SwapRequestCard = ({ request, onUpdate }: { request: SwapRequest; onUpdate
           )}
         </div>
 
-        {request.status === 'pending' && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleReject}
-              disabled={isUpdating}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Recusar
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
-              onClick={handleApprove}
-              disabled={isUpdating}
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Aprovar
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {request.status === 'pending' && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleReject}
+                disabled={isUpdating}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Recusar
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
+                onClick={handleApprove}
+                disabled={isUpdating}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Aprovar
+              </Button>
+            </>
+          )}
+          
+          {canDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={request.status === 'pending' ? '' : 'w-full'}
+                  disabled={isUpdating}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja excluir esta solicitação de troca? Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -462,6 +516,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -484,6 +539,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -506,6 +562,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -528,6 +585,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -550,6 +608,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -572,6 +631,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -594,6 +654,7 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
                   key={request.id} 
                   request={request} 
                   onUpdate={fetchRequests}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
