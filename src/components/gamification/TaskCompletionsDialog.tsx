@@ -34,14 +34,33 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
 
   const fetchCompletions = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: completionsData, error: completionsError } = await supabase
         .from('task_completions')
-        .select('*, profiles(name)')
+        .select('*')
         .eq('task_id', taskId)
         .order('completed_at', { ascending: false });
 
-      if (error) throw error;
-      setCompletions(data || []);
+      if (completionsError) throw completionsError;
+
+      // Fetch profile names separately
+      if (completionsData && completionsData.length > 0) {
+        const userIds = completionsData.map(c => c.user_id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', userIds);
+
+        if (profilesError) throw profilesError;
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        const enrichedData = completionsData.map(completion => ({
+          ...completion,
+          profiles: profilesMap.get(completion.user_id) || { name: 'Desconhecido' }
+        }));
+        setCompletions(enrichedData);
+      } else {
+        setCompletions([]);
+      }
     } catch (error) {
       console.error('Error fetching completions:', error);
       toast({

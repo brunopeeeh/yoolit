@@ -34,13 +34,40 @@ export const RewardPurchasesDialog = ({ open, onOpenChange }: RewardPurchasesDia
 
   const fetchPurchases = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: purchasesData, error: purchasesError } = await supabase
         .from('reward_purchases')
-        .select('*, profiles(name), reward_items(name)')
+        .select('*')
         .order('purchased_at', { ascending: false });
 
-      if (error) throw error;
-      setPurchases(data || []);
+      if (purchasesError) throw purchasesError;
+
+      if (purchasesData && purchasesData.length > 0) {
+        // Fetch profiles
+        const userIds = purchasesData.map(p => p.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', userIds);
+
+        // Fetch reward items
+        const rewardIds = purchasesData.map(p => p.reward_id);
+        const { data: rewardsData } = await supabase
+          .from('reward_items')
+          .select('id, name')
+          .in('id', rewardIds);
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        const rewardsMap = new Map(rewardsData?.map(r => [r.id, r]) || []);
+
+        const enrichedData = purchasesData.map(purchase => ({
+          ...purchase,
+          profiles: profilesMap.get(purchase.user_id) || { name: 'Desconhecido' },
+          reward_items: rewardsMap.get(purchase.reward_id) || { name: 'Desconhecido' }
+        }));
+        setPurchases(enrichedData);
+      } else {
+        setPurchases([]);
+      }
     } catch (error) {
       console.error('Error fetching purchases:', error);
       toast({

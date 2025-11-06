@@ -10,7 +10,11 @@ import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
 import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
 import { AgentWeeklySchedule } from '@/components/admin/AgentWeeklySchedule';
 import { SwapCalendar } from '@/components/admin/SwapCalendar';
-import { BarChart3, Shield, Calendar, RefreshCw, Users } from 'lucide-react';
+import { TasksManagement } from '@/components/gamification/TasksManagement';
+import { AgentTasks } from '@/components/gamification/AgentTasks';
+import { RewardsStore } from '@/components/gamification/RewardsStore';
+import { RewardsManagement } from '@/components/gamification/RewardsManagement';
+import { BarChart3, Shield, Calendar, RefreshCw, Users, Trophy, ShoppingBag, Gift } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -21,7 +25,7 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { isAdmin, hasRole, isLoading: rolesLoading } = useRoles(user?.id);
   const isAgent = hasRole('agent');
-  const activeTab = searchParams.get('tab') || (isAgent && !isAdmin ? 'swap-requests' : 'dashboard');
+  const activeTab = searchParams.get('tab') || (isAgent && !isAdmin ? 'tasks' : 'dashboard');
   const [dashboardData, setDashboardData] = useState({
     availableAgents: 6,
     totalAgents: 13,
@@ -113,16 +117,24 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className={isAgent && !isAdmin ? "grid w-full max-w-[300px]" : "grid w-full grid-cols-4 max-w-[800px]"}>
+          <TabsList className={isAgent && !isAdmin ? "grid w-full grid-cols-3" : "grid w-full grid-cols-8"}>
             {!isAgent || isAdmin ? (
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Dashboard Supervisor
+                Dashboard
               </TabsTrigger>
             ) : null}
+            <TabsTrigger value="tasks" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              Tarefas
+            </TabsTrigger>
+            <TabsTrigger value="store" className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Loja
+            </TabsTrigger>
             <TabsTrigger value="swap-requests" className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
-              Solicitações de Troca
+              Trocas
             </TabsTrigger>
             {!isAgent || isAdmin ? (
               <>
@@ -133,6 +145,14 @@ const Admin = () => {
                 <TabsTrigger value="shifts" className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Escalas
+                </TabsTrigger>
+                <TabsTrigger value="manage-tasks" className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Ger. Tarefas
+                </TabsTrigger>
+                <TabsTrigger value="manage-rewards" className="flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Ger. Recompensas
                 </TabsTrigger>
               </>
             ) : null}
@@ -152,6 +172,14 @@ const Admin = () => {
             </TabsContent>
           ) : null}
 
+          <TabsContent value="tasks" className="mt-6">
+            {isAgent && !isAdmin ? <AgentTasks /> : <TasksManagement />}
+          </TabsContent>
+
+          <TabsContent value="store" className="mt-6">
+            <RewardsStore />
+          </TabsContent>
+
           <TabsContent value="swap-requests" className="mt-6">
             <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />
           </TabsContent>
@@ -164,6 +192,14 @@ const Admin = () => {
 
               <TabsContent value="shifts" className="mt-6">
                 <AgentWeeklySchedule />
+              </TabsContent>
+
+              <TabsContent value="manage-tasks" className="mt-6">
+                <TasksManagement />
+              </TabsContent>
+
+              <TabsContent value="manage-rewards" className="mt-6">
+                <RewardsManagement />
               </TabsContent>
             </>
           ) : null}
