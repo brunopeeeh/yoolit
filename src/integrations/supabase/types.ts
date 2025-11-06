@@ -58,6 +58,36 @@ export type Database = {
           },
         ]
       }
+      agent_wallets: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          total_earned: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -87,6 +117,92 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      reward_items: {
+        Row: {
+          category: string
+          cost: number
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          cost: number
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cost?: number
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reward_purchases: {
+        Row: {
+          delivered_at: string | null
+          delivered_by: string | null
+          id: string
+          notes: string | null
+          points_spent: number
+          purchased_at: string
+          reward_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          delivered_at?: string | null
+          delivered_by?: string | null
+          id?: string
+          notes?: string | null
+          points_spent: number
+          purchased_at?: string
+          reward_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          delivered_at?: string | null
+          delivered_by?: string | null
+          id?: string
+          notes?: string | null
+          points_spent?: number
+          purchased_at?: string
+          reward_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_purchases_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "reward_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shift_swap_requests: {
         Row: {
@@ -330,6 +446,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      task_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          notes: string | null
+          status: string
+          task_id: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          task_id: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          task_id?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          created_by: string
+          deadline: string
+          description: string | null
+          id: string
+          is_active: boolean
+          points: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deadline: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          points?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deadline?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          points?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
