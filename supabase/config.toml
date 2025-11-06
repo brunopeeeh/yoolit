@@ -1,1 +1,4 @@
 project_id = "tfkmdbuffehsgmoznhae"
+
+[functions.status-snapshot]
+verify_jwt = false
