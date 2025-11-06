@@ -15,6 +15,7 @@ interface TaskCompletion {
   completed_at: string;
   status: string;
   notes: string | null;
+  links: string | null;
   profiles: {
     name: string;
   };
@@ -161,6 +162,7 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
                 <TableHead>Agente</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Notas</TableHead>
+                <TableHead>Links</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -172,7 +174,26 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
                   <TableCell>
                     {format(new Date(completion.completed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                   </TableCell>
-                  <TableCell>{completion.notes || '-'}</TableCell>
+                  <TableCell className="max-w-xs truncate">{completion.notes || '-'}</TableCell>
+                  <TableCell className="max-w-xs">
+                    {completion.links ? (
+                      <div className="flex flex-col gap-1">
+                        {completion.links.split('\n').filter(link => link.trim()).map((link, idx) => (
+                          <a
+                            key={idx}
+                            href={link.trim()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline truncate text-sm"
+                          >
+                            {link.trim()}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={

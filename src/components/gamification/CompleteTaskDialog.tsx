@@ -22,6 +22,7 @@ interface CompleteTaskDialogProps {
 
 export const CompleteTaskDialog = ({ task, open, onOpenChange, onSuccess }: CompleteTaskDialogProps) => {
   const [notes, setNotes] = useState('');
+  const [links, setLinks] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -37,6 +38,7 @@ export const CompleteTaskDialog = ({ task, open, onOpenChange, onSuccess }: Comp
         task_id: task.id,
         user_id: user.id,
         notes: notes || null,
+        links: links || null,
       });
 
       if (error) throw error;
@@ -47,6 +49,7 @@ export const CompleteTaskDialog = ({ task, open, onOpenChange, onSuccess }: Comp
       });
 
       setNotes('');
+      setLinks('');
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -81,6 +84,16 @@ export const CompleteTaskDialog = ({ task, open, onOpenChange, onSuccess }: Comp
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Adicione detalhes sobre como você completou esta tarefa..."
               rows={4}
+            />
+          </div>
+          <div>
+            <Label htmlFor="links">Links (opcional)</Label>
+            <Textarea
+              id="links"
+              value={links}
+              onChange={(e) => setLinks(e.target.value)}
+              placeholder="Adicione links relevantes, um por linha..."
+              rows={3}
             />
           </div>
           <DialogFooter>

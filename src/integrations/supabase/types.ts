@@ -481,6 +481,7 @@ export type Database = {
         Row: {
           completed_at: string
           id: string
+          links: string | null
           notes: string | null
           status: string
           task_id: string
@@ -491,6 +492,7 @@ export type Database = {
         Insert: {
           completed_at?: string
           id?: string
+          links?: string | null
           notes?: string | null
           status?: string
           task_id: string
@@ -501,6 +503,7 @@ export type Database = {
         Update: {
           completed_at?: string
           id?: string
+          links?: string | null
           notes?: string | null
           status?: string
           task_id?: string
