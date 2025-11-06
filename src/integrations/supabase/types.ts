@@ -101,6 +101,8 @@ export type Database = {
           reviewed_by: string | null
           status: Database["public"]["Enums"]["swap_request_status"]
           swap_date: string | null
+          target_approved: boolean | null
+          target_approved_at: string | null
           target_id: string
           target_schedule_id: string | null
           target_shift_id: string | null
@@ -118,6 +120,8 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["swap_request_status"]
           swap_date?: string | null
+          target_approved?: boolean | null
+          target_approved_at?: string | null
           target_id: string
           target_schedule_id?: string | null
           target_shift_id?: string | null
@@ -135,6 +139,8 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["swap_request_status"]
           swap_date?: string | null
+          target_approved?: boolean | null
+          target_approved_at?: string | null
           target_id?: string
           target_schedule_id?: string | null
           target_shift_id?: string | null

@@ -20,6 +20,8 @@ interface SwapRequest {
   status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'completed';
   payment_scheduled_for: string | null;
   swap_date: string | null;
+  target_approved: boolean;
+  target_approved_at: string | null;
   requester: {
     id: string;
     name: string;
@@ -68,7 +70,8 @@ const formatTime = (time: string) => {
 };
 
 const statusBadgeConfig = {
-  pending: { label: 'Pendente', className: 'bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20' },
+  pending: { label: 'Aguardando Agente', className: 'bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20' },
+  pending_supervisor: { label: 'Aguardando Supervisor', className: 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20' },
   approved: { label: 'Aprovada', className: 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' },
   rejected: { label: 'Recusada', className: 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20' },
   cancelled: { label: 'Cancelada', className: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20' },
@@ -77,13 +80,49 @@ const statusBadgeConfig = {
 
 const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRequest; onUpdate: () => void; currentUserId: string | null }) => {
   const [isUpdating, setIsUpdating] = useState(false);
-  const { isAdmin } = useRoles(currentUserId || undefined);
+  const { isAdmin, hasRole } = useRoles(currentUserId || undefined);
   
   const canDelete = currentUserId === request.requester.id || isAdmin;
+  const isTarget = currentUserId === request.target.id;
+  const isSupervisor = hasRole('supervisor');
+  
+  // Determine display status
+  const displayStatus = request.status === 'pending' && request.target_approved 
+    ? 'pending_supervisor' 
+    : request.status;
 
-  const handleApprove = async () => {
+  const handleTargetApprove = async () => {
     setIsUpdating(true);
     try {
+      const { error } = await supabase
+        .from('shift_swap_requests')
+        .update({ 
+          target_approved: true,
+          target_approved_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+      toast.success('Troca pré-aprovada! Aguardando supervisor.');
+      onUpdate();
+    } catch (error) {
+      console.error('Error approving as target:', error);
+      toast.error('Erro ao pré-aprovar solicitação');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSupervisorApprove = async () => {
+    setIsUpdating(true);
+    try {
+      // Verificar se o agente já aprovou
+      if (!request.target_approved) {
+        toast.error('O agente destinatário precisa aprovar primeiro');
+        setIsUpdating(false);
+        return;
+      }
+
       const { error } = await supabase
         .from('shift_swap_requests')
         .update({ 
@@ -94,7 +133,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
         .eq('id', request.id);
 
       if (error) throw error;
-      toast.success('Solicitação aprovada');
+      toast.success('Troca confirmada pelo supervisor!');
       onUpdate();
     } catch (error) {
       console.error('Error approving request:', error);
@@ -146,7 +185,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
     }
   };
 
-  const statusConfig = statusBadgeConfig[request.status];
+  const statusConfig = statusBadgeConfig[displayStatus as keyof typeof statusBadgeConfig];
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -240,7 +279,7 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
         </div>
 
         <div className="flex items-center gap-2">
-          {request.status === 'pending' && (
+          {request.status === 'pending' && !request.target_approved && isTarget && (
             <>
               <Button
                 variant="outline"
@@ -255,11 +294,35 @@ const SwapRequestCard = ({ request, onUpdate, currentUserId }: { request: SwapRe
               <Button
                 size="sm"
                 className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
-                onClick={handleApprove}
+                onClick={handleTargetApprove}
                 disabled={isUpdating}
               >
                 <Check className="h-4 w-4 mr-2" />
-                Aprovar
+                Pré-aprovar
+              </Button>
+            </>
+          )}
+          
+          {request.status === 'pending' && request.target_approved && isSupervisor && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleReject}
+                disabled={isUpdating}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Recusar
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                onClick={handleSupervisorApprove}
+                disabled={isUpdating}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Confirmar Troca
               </Button>
             </>
           )}
@@ -337,6 +400,8 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
           status,
           payment_scheduled_for,
           swap_date,
+          target_approved,
+          target_approved_at,
           requester_id,
           target_id,
           requester_shift_id,
@@ -384,6 +449,8 @@ export const ShiftSwapRequests = ({ isAgentView = false }: ShiftSwapRequestsProp
         status: req.status,
         payment_scheduled_for: req.payment_scheduled_for,
         swap_date: req.swap_date,
+        target_approved: req.target_approved,
+        target_approved_at: req.target_approved_at,
         requester: req.requester || { id: req.requester_id, name: 'Usuário desconhecido' },
         target: req.target || { id: req.target_id, name: 'Usuário desconhecido' },
         requester_schedule: req.requester_schedule,
