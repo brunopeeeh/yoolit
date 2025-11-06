@@ -287,6 +287,39 @@ export const SwapCalendar = () => {
                     </span>
                   </div>
 
+                  {/* Horários de Alteração */}
+                  {swap.requester_shift && swap.target_shift && (
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50/50 to-indigo-50/50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200/50 dark:border-purple-800/50">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        Alteração de Horários
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">{swap.requester.name} trabalhará:</p>
+                            <p className="font-mono font-semibold text-green-700 dark:text-green-400">
+                              {swap.target_shift.start_time} - {swap.target_shift.end_time}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              (antes: {swap.requester_shift.start_time} - {swap.requester_shift.end_time})
+                            </p>
+                          </div>
+                          <ArrowLeftRight className="h-5 w-5 text-purple-500 mx-4 flex-shrink-0" />
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">{swap.target.name} trabalhará:</p>
+                            <p className="font-mono font-semibold text-blue-700 dark:text-blue-400">
+                              {swap.requester_shift.start_time} - {swap.requester_shift.end_time}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              (antes: {swap.target_shift.start_time} - {swap.target_shift.end_time})
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Detalhes dos Agentes */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Solicitante */}
