@@ -79,9 +79,9 @@ export const STATUS_CONFIG: StatusConfig[] = [
     value: "unavailable", 
     label: "Indisponível", 
     icon: XCircle, 
-    hexColor: "#EC4899",
-    textColor: "text-pink-500",
-    bgColor: "bg-pink-500"
+    hexColor: "#ef4444",
+    textColor: "text-red-500",
+    bgColor: "bg-red-500"
   },
 ];
 

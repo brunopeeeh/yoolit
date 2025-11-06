@@ -394,7 +394,7 @@ export const AgentScheduleChart = () => {
               <span className="text-sm text-muted-foreground">Disponível</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-pink-500" />
+              <div className="w-4 h-4 rounded bg-red-500" />
               <span className="text-sm text-muted-foreground">Indisponível</span>
             </div>
           </div>

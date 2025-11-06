@@ -24,7 +24,7 @@ const statuses = [
   { value: "water", label: "Água/Banheiro", icon: Droplets, color: "#06B6D4" },
   { value: "external", label: "Demandas Externas", icon: ExternalLink, color: "#4338CA" },
   { value: "available", label: "Disponível", icon: CheckCircle, color: "#10B981" },
-  { value: "unavailable", label: "Indisponível", icon: XCircle, color: "#EC4899" },
+  { value: "unavailable", label: "Indisponível", icon: XCircle, color: "#ef4444" },
 ];
 
 interface HeaderProps {
