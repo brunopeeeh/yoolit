@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Package, CheckCircle, XCircle, ImageIcon } from 'lucide-react';
+import { Plus, Package, CheckCircle, XCircle, ImageIcon, Pencil } from 'lucide-react';
 import { CreateRewardDialog } from './CreateRewardDialog';
+import { EditRewardDialog } from './EditRewardDialog';
 import { RewardPurchasesDialog } from './RewardPurchasesDialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,6 +35,7 @@ export const RewardsManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showPurchasesDialog, setShowPurchasesDialog] = useState(false);
+  const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
   const { toast } = useToast();
 
   const fetchRewards = async () => {
@@ -169,17 +171,26 @@ export const RewardsManagement = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleRewardStatus(reward.id, reward.is_active)}
-                    >
-                      {reward.is_active ? (
-                        <XCircle className="h-4 w-4" />
-                      ) : (
-                        <CheckCircle className="h-4 w-4" />
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingReward(reward)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleRewardStatus(reward.id, reward.is_active)}
+                      >
+                        {reward.is_active ? (
+                          <XCircle className="h-4 w-4" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -191,6 +202,13 @@ export const RewardsManagement = () => {
       <CreateRewardDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+        onSuccess={fetchRewards}
+      />
+
+      <EditRewardDialog
+        reward={editingReward}
+        open={!!editingReward}
+        onOpenChange={(open) => !open && setEditingReward(null)}
         onSuccess={fetchRewards}
       />
 
