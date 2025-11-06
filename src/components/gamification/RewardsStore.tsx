@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Coins, ShoppingCart, Package } from 'lucide-react';
+import { Coins, ShoppingCart, Package, ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { WalletCard } from './WalletCard';
 
@@ -147,7 +147,23 @@ export const RewardsStore = () => {
               const hasStock = reward.stock === null || reward.stock > 0;
 
               return (
-                <Card key={reward.id}>
+                <Card key={reward.id} className="overflow-hidden">
+                  {reward.image_url && (
+                    <div className="relative h-48 w-full overflow-hidden bg-muted">
+                      <img
+                        src={reward.image_url}
+                        alt={reward.name}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="hidden absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    </div>
+                  )}
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{reward.name}</CardTitle>

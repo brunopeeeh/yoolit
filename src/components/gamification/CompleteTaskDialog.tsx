@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { ListChecks } from 'lucide-react';
 
 interface Task {
   id: string;
   title: string;
   description: string | null;
+  completion_rules: string | null;
   points: number;
 }
 
@@ -76,6 +78,17 @@ export const CompleteTaskDialog = ({ task, open, onOpenChange, onSuccess }: Comp
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {task.completion_rules && (
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              <div className="flex items-center gap-2 font-semibold">
+                <ListChecks className="h-4 w-4" />
+                Regras para Conclusão
+              </div>
+              <p className="text-sm text-muted-foreground whitespace-pre-line">
+                {task.completion_rules}
+              </p>
+            </div>
+          )}
           <div>
             <Label htmlFor="notes">Notas (opcional)</Label>
             <Textarea

@@ -18,6 +18,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    completion_rules: '',
     points: '',
     deadline: '',
   });
@@ -34,6 +35,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
       const { error } = await supabase.from('tasks').insert({
         title: formData.title,
         description: formData.description || null,
+        completion_rules: formData.completion_rules || null,
         points: parseInt(formData.points),
         deadline: new Date(formData.deadline).toISOString(),
         created_by: user.id,
@@ -46,7 +48,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
         description: 'Tarefa criada com sucesso',
       });
 
-      setFormData({ title: '', description: '', points: '', deadline: '' });
+      setFormData({ title: '', description: '', completion_rules: '', points: '', deadline: '' });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -86,6 +88,16 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+            />
+          </div>
+          <div>
+            <Label htmlFor="completion_rules">Regras para Conclusão</Label>
+            <Textarea
+              id="completion_rules"
+              value={formData.completion_rules}
+              onChange={(e) => setFormData({ ...formData, completion_rules: e.target.value })}
+              placeholder="Ex: Enviar print da tela, preencher formulário, realizar venda acima de X"
               rows={3}
             />
           </div>

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Award, Calendar, CheckCircle } from 'lucide-react';
+import { Award, Calendar, CheckCircle, ListChecks } from 'lucide-react';
 import { CompleteTaskDialog } from './CompleteTaskDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ interface Task {
   id: string;
   title: string;
   description: string | null;
+  completion_rules: string | null;
   points: number;
   deadline: string;
 }
@@ -118,6 +119,17 @@ export const AgentTasks = () => {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {task.completion_rules && (
+                      <div className="p-3 bg-muted rounded-lg space-y-2">
+                        <div className="flex items-center gap-2 font-semibold text-sm">
+                          <ListChecks className="h-4 w-4" />
+                          Regras para Conclusão
+                        </div>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">
+                          {task.completion_rules}
+                        </p>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Award className="h-5 w-5 text-yellow-500" />

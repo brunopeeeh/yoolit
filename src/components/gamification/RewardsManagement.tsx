@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Package, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Package, CheckCircle, XCircle, ImageIcon } from 'lucide-react';
 import { CreateRewardDialog } from './CreateRewardDialog';
 import { RewardPurchasesDialog } from './RewardPurchasesDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ interface RewardItem {
   cost: number;
   category: string;
   stock: number | null;
+  image_url: string | null;
   is_active: boolean;
 }
 
@@ -114,6 +115,7 @@ export const RewardsManagement = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Imagem</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Custo</TableHead>
@@ -125,6 +127,22 @@ export const RewardsManagement = () => {
             <TableBody>
               {rewards.map((reward) => (
                 <TableRow key={reward.id}>
+                  <TableCell>
+                    {reward.image_url ? (
+                      <img
+                        src={reward.image_url}
+                        alt={reward.name}
+                        className="h-12 w-12 object-cover rounded"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={reward.image_url ? 'hidden' : 'flex h-12 w-12 items-center justify-center bg-muted rounded'}>
+                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{reward.name}</p>

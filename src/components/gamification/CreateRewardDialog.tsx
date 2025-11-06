@@ -31,6 +31,7 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
     cost: '',
     category: '',
     stock: '',
+    image_url: '',
   });
   const { toast } = useToast();
 
@@ -48,6 +49,7 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
         cost: parseInt(formData.cost),
         category: formData.category,
         stock: formData.stock ? parseInt(formData.stock) : null,
+        image_url: formData.image_url || null,
         created_by: user.id,
       });
 
@@ -58,7 +60,7 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
         description: 'Recompensa criada com sucesso',
       });
 
-      setFormData({ name: '', description: '', cost: '', category: '', stock: '' });
+      setFormData({ name: '', description: '', cost: '', category: '', stock: '', image_url: '' });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -139,6 +141,16 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
               min="0"
               value={formData.stock}
               onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="image_url">URL da Imagem</Label>
+            <Input
+              id="image_url"
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              placeholder="https://exemplo.com/imagem.jpg"
             />
           </div>
           <DialogFooter>

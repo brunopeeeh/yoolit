@@ -15,6 +15,7 @@ interface Task {
   id: string;
   title: string;
   description: string | null;
+  completion_rules: string | null;
   points: number;
   deadline: string;
   is_active: boolean;
@@ -113,10 +114,16 @@ export const TasksManagement = () => {
               {tasks.map((task) => (
                 <TableRow key={task.id}>
                   <TableCell>
-                    <div>
+                    <div className="space-y-1">
                       <p className="font-medium">{task.title}</p>
                       {task.description && (
                         <p className="text-sm text-muted-foreground">{task.description}</p>
+                      )}
+                      {task.completion_rules && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          📋 Regras: {task.completion_rules.substring(0, 80)}
+                          {task.completion_rules.length > 80 ? '...' : ''}
+                        </p>
                       )}
                     </div>
                   </TableCell>
