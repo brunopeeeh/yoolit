@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, Award, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil } from 'lucide-react';
 import { CreateTaskDialog } from './CreateTaskDialog';
+import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -27,6 +28,7 @@ export const TasksManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const { toast } = useToast();
 
   const fetchTasks = async () => {
@@ -149,6 +151,13 @@ export const TasksManagement = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => setEditingTask(task)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setSelectedTask(task.id)}
                       >
                         Ver Conclusões
@@ -176,6 +185,13 @@ export const TasksManagement = () => {
       <CreateTaskDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+        onSuccess={fetchTasks}
+      />
+
+      <EditTaskDialog
+        task={editingTask}
+        open={!!editingTask}
+        onOpenChange={(open) => !open && setEditingTask(null)}
         onSuccess={fetchTasks}
       />
 
