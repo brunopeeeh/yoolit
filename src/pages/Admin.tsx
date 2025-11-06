@@ -9,6 +9,7 @@ import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
 import { ShiftSwapRequests } from '@/components/admin/ShiftSwapRequests';
 import { AgentWeeklySchedule } from '@/components/admin/AgentWeeklySchedule';
+import { SwapCalendar } from '@/components/admin/SwapCalendar';
 import { BarChart3, Shield, Calendar, RefreshCw, Users } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
@@ -146,7 +147,10 @@ const Admin = () => {
                 approvedSwaps={dashboardData.approvedSwaps}
                 coverage={dashboardData.coverage}
               />
-              <AgentScheduleChart />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <AgentScheduleChart />
+                <SwapCalendar />
+              </div>
             </TabsContent>
           ) : null}
 
