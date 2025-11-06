@@ -55,7 +55,7 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
   
   const CurrentStatusIcon = currentStatusObj.icon;
   return (
-    <header className="bg-gradient-to-r from-[#4A9FBD] to-[#2E7D9B] text-white py-2 px-4 sm:py-4 sm:px-6 shadow-lg">
+    <header className="bg-gradient-to-r from-[#83cef6] to-[#0a639a] text-white py-2 px-4 sm:py-4 sm:px-6 shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 sm:h-16">
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <h1 className="text-sm sm:text-2xl font-bold truncate leading-none">Maya</h1>

@@ -269,7 +269,7 @@ const LoginPopover = ({ user, profile, onUserChange, onProfileChange, children, 
               </div>
               <Button
                 type="submit"
-                className="w-full bg-[#83cef6] hover:bg-[#62a3d6] text-white"
+                className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
                 disabled={isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
