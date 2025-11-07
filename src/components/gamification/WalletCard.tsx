@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, History } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Wallet {
   points: number;
@@ -9,7 +10,11 @@ interface Wallet {
   total_spent: number;
 }
 
-export const WalletCard = () => {
+interface WalletCardProps {
+  onOpenHistory: () => void;
+}
+
+export const WalletCard = ({ onOpenHistory }: WalletCardProps) => {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,13 +62,26 @@ export const WalletCard = () => {
   return (
     <Card className="shadow-lg border-primary/20 hover:shadow-xl transition-shadow">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <div className="p-2 rounded-lg bg-yellow-500/10">
-            <Wallet className="h-5 w-5 text-yellow-500" />
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-yellow-500/10">
+                <Wallet className="h-5 w-5 text-yellow-500" />
+              </div>
+              Minha Wallet
+            </CardTitle>
+            <CardDescription>Seus pontos e estatísticas</CardDescription>
           </div>
-          Minha Wallet
-        </CardTitle>
-        <CardDescription>Seus pontos e estatísticas</CardDescription>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenHistory}
+            className="gap-2"
+          >
+            <History className="h-4 w-4" />
+            Histórico
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
