@@ -194,12 +194,12 @@ export const RewardsStore = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="grid gap-4 md:grid-cols-[1fr_auto]">
         <WalletCard />
         <Button
           variant="outline"
           onClick={() => setHistoryOpen(true)}
-          className="gap-2"
+          className="gap-2 h-fit md:mt-16"
         >
           <History className="h-4 w-4" />
           Meu Histórico

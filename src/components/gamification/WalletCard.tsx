@@ -55,34 +55,40 @@ export const WalletCard = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-yellow-500" />
+    <Card className="shadow-lg border-primary/20 hover:shadow-xl transition-shadow">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <div className="p-2 rounded-lg bg-yellow-500/10">
+            <Wallet className="h-5 w-5 text-yellow-500" />
+          </div>
           Minha Wallet
         </CardTitle>
         <CardDescription>Seus pontos e estatísticas</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-2">Pontos Disponíveis</p>
-            <p className="text-4xl font-bold text-yellow-500">{wallet?.points || 0}</p>
+          <div className="text-center p-6 rounded-lg bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20">
+            <p className="text-sm text-muted-foreground mb-2 font-medium">Pontos Disponíveis</p>
+            <p className="text-5xl font-bold text-yellow-500 tracking-tight">{wallet?.points || 0}</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                <span>Total Ganho</span>
+            <div className="space-y-2 p-4 rounded-lg bg-muted/50 border border-border/50">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="p-1.5 rounded bg-green-500/10">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                </div>
+                <span className="font-medium">Total Ganho</span>
               </div>
-              <p className="text-2xl font-semibold">{wallet?.total_earned || 0}</p>
+              <p className="text-2xl font-bold">{wallet?.total_earned || 0}</p>
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <TrendingDown className="h-4 w-4 text-red-500" />
-                <span>Total Gasto</span>
+            <div className="space-y-2 p-4 rounded-lg bg-muted/50 border border-border/50">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="p-1.5 rounded bg-red-500/10">
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                </div>
+                <span className="font-medium">Total Gasto</span>
               </div>
-              <p className="text-2xl font-semibold">{wallet?.total_spent || 0}</p>
+              <p className="text-2xl font-bold">{wallet?.total_spent || 0}</p>
             </div>
           </div>
         </div>
