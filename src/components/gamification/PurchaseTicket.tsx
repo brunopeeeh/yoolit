@@ -32,7 +32,7 @@ export const PurchaseTicket = ({ open, onOpenChange, purchase }: PurchaseTicketP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 overflow-hidden border-none">
-        <div className="relative bg-gradient-to-br from-[#0EA5E9] via-[#3B82F6] to-[#8B5CF6] p-8 text-white">
+        <div className="relative bg-gradient-to-br from-[#83cef6] via-[#8dd1f6] to-[#0a639a] p-8 text-white">
           {/* Decorative circles */}
           <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-background rounded-full" />
           <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-background rounded-full" />
@@ -46,7 +46,7 @@ export const PurchaseTicket = ({ open, onOpenChange, purchase }: PurchaseTicketP
 
           {/* Success message */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full mb-2 shadow-lg">
+            <div className="inline-flex items-center gap-2 bg-green-100 text-green-500 px-4 py-2 rounded-full mb-2 shadow-lg">
               <Check className="h-4 w-4" />
               <span className="font-semibold">Resgate Confirmado!</span>
             </div>
@@ -98,7 +98,7 @@ export const PurchaseTicket = ({ open, onOpenChange, purchase }: PurchaseTicketP
           </p>
           <Button 
             onClick={() => onOpenChange(false)}
-            className="w-full"
+            className="w-full bg-[#83cef6] hover:bg-[#8dd1f6] text-[#0a639a]"
           >
             Fechar Comprovante
           </Button>
