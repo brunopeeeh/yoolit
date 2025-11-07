@@ -15,6 +15,8 @@ interface RewardItem {
   category: string;
   stock: number | null;
   image_url: string | null;
+  max_purchases_per_user: number | null;
+  max_uses_per_month: number | null;
 }
 
 interface Wallet {
@@ -97,6 +99,46 @@ export const RewardsStore = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
+
+      // Check max purchases per user
+      if (reward.max_purchases_per_user !== null) {
+        const { count } = await supabase
+          .from('reward_purchases')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('reward_id', reward.id);
+
+        if (count && count >= reward.max_purchases_per_user) {
+          toast({
+            title: 'Limite atingido',
+            description: `Você já comprou esta recompensa ${reward.max_purchases_per_user} vez(es)`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      // Check max uses per month
+      if (reward.max_uses_per_month !== null) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const { count } = await supabase
+          .from('reward_purchases')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('reward_id', reward.id)
+          .gte('purchased_at', startOfMonth.toISOString());
+
+        if (count && count >= reward.max_uses_per_month) {
+          toast({
+            title: 'Limite mensal atingido',
+            description: `Você já comprou esta recompensa ${reward.max_uses_per_month} vez(es) este mês`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
 
       const { error } = await supabase.from('reward_purchases').insert({
         reward_id: reward.id,

@@ -32,6 +32,8 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
     category: '',
     stock: '',
     image_url: '',
+    max_purchases_per_user: '',
+    max_uses_per_month: '',
   });
   const { toast } = useToast();
 
@@ -50,6 +52,8 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
         category: formData.category,
         stock: formData.stock ? parseInt(formData.stock) : null,
         image_url: formData.image_url || null,
+        max_purchases_per_user: formData.max_purchases_per_user ? parseInt(formData.max_purchases_per_user) : null,
+        max_uses_per_month: formData.max_uses_per_month ? parseInt(formData.max_uses_per_month) : null,
         created_by: user.id,
       });
 
@@ -60,7 +64,7 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
         description: 'Recompensa criada com sucesso',
       });
 
-      setFormData({ name: '', description: '', cost: '', category: '', stock: '', image_url: '' });
+      setFormData({ name: '', description: '', cost: '', category: '', stock: '', image_url: '', max_purchases_per_user: '', max_uses_per_month: '' });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -151,6 +155,28 @@ export const CreateRewardDialog = ({ open, onOpenChange, onSuccess }: CreateRewa
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
               placeholder="https://exemplo.com/imagem.jpg"
+            />
+          </div>
+          <div>
+            <Label htmlFor="max_purchases_per_user">Limite de Compras por Usuário (deixe vazio para ilimitado)</Label>
+            <Input
+              id="max_purchases_per_user"
+              type="number"
+              min="1"
+              value={formData.max_purchases_per_user}
+              onChange={(e) => setFormData({ ...formData, max_purchases_per_user: e.target.value })}
+              placeholder="Ex: 2 (usuário pode comprar no máximo 2 vezes)"
+            />
+          </div>
+          <div>
+            <Label htmlFor="max_uses_per_month">Limite de Usos por Mês (deixe vazio para ilimitado)</Label>
+            <Input
+              id="max_uses_per_month"
+              type="number"
+              min="1"
+              value={formData.max_uses_per_month}
+              onChange={(e) => setFormData({ ...formData, max_uses_per_month: e.target.value })}
+              placeholder="Ex: 1 (usuário pode usar 1 vez por mês)"
             />
           </div>
           <DialogFooter>

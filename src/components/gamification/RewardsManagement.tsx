@@ -19,6 +19,8 @@ interface RewardItem {
   stock: number | null;
   image_url: string | null;
   is_active: boolean;
+  max_purchases_per_user: number | null;
+  max_uses_per_month: number | null;
 }
 
 const categoryLabels: Record<string, string> = {

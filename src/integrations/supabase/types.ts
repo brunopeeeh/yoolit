@@ -136,6 +136,8 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          max_purchases_per_user: number | null
+          max_uses_per_month: number | null
           name: string
           stock: number | null
           updated_at: string
@@ -149,6 +151,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          max_purchases_per_user?: number | null
+          max_uses_per_month?: number | null
           name: string
           stock?: number | null
           updated_at?: string
@@ -162,6 +166,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          max_purchases_per_user?: number | null
+          max_uses_per_month?: number | null
           name?: string
           stock?: number | null
           updated_at?: string

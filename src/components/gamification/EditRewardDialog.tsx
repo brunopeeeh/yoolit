@@ -16,6 +16,8 @@ interface RewardItem {
   category: string;
   stock: number | null;
   image_url: string | null;
+  max_purchases_per_user: number | null;
+  max_uses_per_month: number | null;
 }
 
 interface EditRewardDialogProps {
@@ -43,6 +45,8 @@ export const EditRewardDialog = ({ reward, open, onOpenChange, onSuccess }: Edit
     category: '',
     stock: '',
     image_url: '',
+    max_purchases_per_user: '',
+    max_uses_per_month: '',
   });
   const { toast } = useToast();
 
@@ -55,6 +59,8 @@ export const EditRewardDialog = ({ reward, open, onOpenChange, onSuccess }: Edit
         category: reward.category,
         stock: reward.stock !== null ? reward.stock.toString() : '',
         image_url: reward.image_url || '',
+        max_purchases_per_user: reward.max_purchases_per_user !== null ? reward.max_purchases_per_user.toString() : '',
+        max_uses_per_month: reward.max_uses_per_month !== null ? reward.max_uses_per_month.toString() : '',
       });
     }
   }, [reward]);
@@ -75,6 +81,8 @@ export const EditRewardDialog = ({ reward, open, onOpenChange, onSuccess }: Edit
           category: formData.category,
           stock: formData.stock ? parseInt(formData.stock) : null,
           image_url: formData.image_url || null,
+          max_purchases_per_user: formData.max_purchases_per_user ? parseInt(formData.max_purchases_per_user) : null,
+          max_uses_per_month: formData.max_uses_per_month ? parseInt(formData.max_uses_per_month) : null,
         })
         .eq('id', reward.id);
 
@@ -175,6 +183,28 @@ export const EditRewardDialog = ({ reward, open, onOpenChange, onSuccess }: Edit
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
               placeholder="https://exemplo.com/imagem.jpg"
+            />
+          </div>
+          <div>
+            <Label htmlFor="max_purchases_per_user">Limite de Compras por Usuário (deixe vazio para ilimitado)</Label>
+            <Input
+              id="max_purchases_per_user"
+              type="number"
+              min="1"
+              value={formData.max_purchases_per_user}
+              onChange={(e) => setFormData({ ...formData, max_purchases_per_user: e.target.value })}
+              placeholder="Ex: 2 (usuário pode comprar no máximo 2 vezes)"
+            />
+          </div>
+          <div>
+            <Label htmlFor="max_uses_per_month">Limite de Usos por Mês (deixe vazio para ilimitado)</Label>
+            <Input
+              id="max_uses_per_month"
+              type="number"
+              min="1"
+              value={formData.max_uses_per_month}
+              onChange={(e) => setFormData({ ...formData, max_uses_per_month: e.target.value })}
+              placeholder="Ex: 1 (usuário pode usar 1 vez por mês)"
             />
           </div>
           <DialogFooter>
