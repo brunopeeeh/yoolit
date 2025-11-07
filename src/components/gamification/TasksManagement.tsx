@@ -8,6 +8,7 @@ import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil } from 'lucide-reac
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
+import { TasksRanking } from './TasksRanking';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -88,6 +89,8 @@ export const TasksManagement = () => {
 
   return (
     <div className="space-y-6">
+      <TasksRanking />
+      
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
