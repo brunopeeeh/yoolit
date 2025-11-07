@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Award, Calendar, CheckCircle, ListChecks } from 'lucide-react';
 import { CompleteTaskDialog } from './CompleteTaskDialog';
+import { AgentsRanking } from './AgentsRanking';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -82,6 +83,8 @@ export const AgentTasks = () => {
 
   return (
     <div className="space-y-6">
+      <AgentsRanking />
+      
       <Card>
         <CardHeader>
           <CardTitle>Tarefas Disponíveis</CardTitle>
