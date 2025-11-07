@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Search } from 'lucide-react';
 import { EditAgentDialog } from './EditAgentDialog';
 import { NewAgentDialog } from './NewAgentDialog';
 
@@ -22,6 +24,8 @@ export const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNewAgentDialogOpen, setIsNewAgentDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const { toast } = useToast();
 
   const fetchProfiles = async () => {
@@ -88,6 +92,13 @@ export const UserManagement = () => {
     }
   };
 
+  const filteredProfiles = profiles.filter(profile => {
+    const matchesSearch = profile.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         profile.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || profile.roles.includes(roleFilter);
+    return matchesSearch && matchesRole;
+  });
+
   if (isLoading) {
     return <div className="text-center py-8">Carregando...</div>;
   }
@@ -113,6 +124,28 @@ export const UserManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por nome ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filtrar por permissão" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as permissões</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="supervisor">Supervisor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -123,7 +156,7 @@ export const UserManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {profiles.map((profile) => (
+              {filteredProfiles.map((profile) => (
                 <TableRow key={profile.id}>
                   <TableCell className="font-medium">{profile.name || 'Sem nome'}</TableCell>
                   <TableCell>{profile.email}</TableCell>
