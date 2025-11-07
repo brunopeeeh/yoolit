@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Trophy, TrendingUp } from 'lucide-react';
+import { Trophy, TrendingUp, BarChart3, BarChart2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface AgentRankingData {
   agent_name: string;
@@ -14,6 +15,7 @@ interface AgentRankingData {
 export const AgentsRanking = () => {
   const [rankingData, setRankingData] = useState<AgentRankingData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVertical, setIsVertical] = useState(false);
 
   const fetchRankingData = async () => {
     try {
@@ -89,13 +91,35 @@ export const AgentsRanking = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-500" />
-          Ranking de Agentes
-        </CardTitle>
-        <CardDescription>
-          Top 10 agentes por conclusão de tarefas e pontos ganhos
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Ranking de Agentes
+            </CardTitle>
+            <CardDescription>
+              Top 10 agentes por conclusão de tarefas e pontos ganhos
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsVertical(!isVertical)}
+            className="gap-2"
+          >
+            {isVertical ? (
+              <>
+                <BarChart2 className="h-4 w-4" />
+                Horizontal
+              </>
+            ) : (
+              <>
+                <BarChart3 className="h-4 w-4" />
+                Vertical
+              </>
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -103,18 +127,32 @@ export const AgentsRanking = () => {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               data={rankingData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+              layout={isVertical ? "vertical" : "horizontal"}
+              margin={{ top: 20, right: 30, left: isVertical ? 80 : 20, bottom: isVertical ? 20 : 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis
-                dataKey="agent_name"
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                className="text-xs"
-              />
-              <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
-              <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--chart-2))" />
+              {isVertical ? (
+                <>
+                  <XAxis type="number" />
+                  <YAxis 
+                    type="category" 
+                    dataKey="agent_name" 
+                    width={70}
+                    className="text-xs"
+                  />
+                </>
+              ) : (
+                <>
+                  <XAxis
+                    dataKey="agent_name"
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    className="text-xs"
+                  />
+                  <YAxis type="number" />
+                </>
+              )}
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--popover))',
@@ -125,18 +163,16 @@ export const AgentsRanking = () => {
               />
               <Legend />
               <Bar
-                yAxisId="left"
                 dataKey="completed_tasks"
                 fill="hsl(var(--primary))"
                 name="Tarefas Concluídas"
-                radius={[8, 8, 0, 0]}
+                radius={isVertical ? [0, 8, 8, 0] : [8, 8, 0, 0]}
               />
               <Bar
-                yAxisId="right"
                 dataKey="total_points"
                 fill="hsl(var(--chart-2))"
                 name="Pontos Totais"
-                radius={[8, 8, 0, 0]}
+                radius={isVertical ? [0, 8, 8, 0] : [8, 8, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
