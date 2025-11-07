@@ -72,13 +72,10 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
               variant="ghost"
               className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
               onClick={() => {
-                if (location.pathname === '/admin') {
-                  navigate('/');
-                } else {
-                  navigate(isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard');
-                }
+                const adminUrl = isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard';
+                window.open(adminUrl, '_blank');
               }}
-              title={location.pathname === '/admin' ? 'Voltar ao Chat' : 'Painel Administrativo'}
+              title="Abrir Painel Administrativo"
             >
               <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
