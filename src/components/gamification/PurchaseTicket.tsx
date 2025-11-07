@@ -34,8 +34,8 @@ export const PurchaseTicket = ({ open, onOpenChange, purchase }: PurchaseTicketP
       <DialogContent className="max-w-md p-0 overflow-hidden border-none">
         <div className="relative bg-gradient-to-br from-[#0EA5E9] via-[#3B82F6] to-[#8B5CF6] p-8 text-white">
           {/* Decorative circles */}
-          <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-transparent border-4 border-background rounded-full" />
-          <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-transparent border-4 border-background rounded-full" />
+          <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-background rounded-full" />
+          <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-background rounded-full" />
           
           {/* Ticket icon */}
           <div className="flex justify-center mb-4">
