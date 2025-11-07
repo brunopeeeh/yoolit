@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle, XCircle, User, Calendar, FileText, Link as LinkIcon, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, User, Calendar, FileText, Link as LinkIcon, Clock, ListChecks } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -17,6 +17,7 @@ interface TaskCompletion {
   status: string;
   notes: string | null;
   links: string | null;
+  completed_items: Array<{ id: string; description: string; points: number }> | null;
   profiles: {
     name: string;
   };
@@ -58,7 +59,7 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
         const enrichedData = completionsData.map(completion => ({
           ...completion,
           profiles: profilesMap.get(completion.user_id) || { name: 'Desconhecido' }
-        }));
+        })) as unknown as TaskCompletion[];
         setCompletions(enrichedData);
       } else {
         setCompletions([]);
@@ -216,6 +217,28 @@ export const TaskCompletionsDialog = ({ taskId, open, onOpenChange, onUpdate }: 
                         <p className="text-sm text-muted-foreground pl-6 whitespace-pre-wrap">
                           {completion.notes}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Completed checklist items */}
+                    {completion.completed_items && completion.completed_items.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <ListChecks className="h-4 w-4 text-muted-foreground" />
+                          <span>Itens Completados</span>
+                        </div>
+                        <div className="pl-6 space-y-1.5">
+                          {completion.completed_items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                              <span className="text-muted-foreground">{item.description}</span>
+                              <span className="font-semibold text-xs">{item.points} pts</span>
+                            </div>
+                          ))}
+                          <div className="flex items-center justify-between text-sm font-semibold p-2 bg-primary/10 rounded mt-2">
+                            <span>Total de Pontos</span>
+                            <span>{completion.completed_items.reduce((sum, item) => sum + item.points, 0)} pts</span>
+                          </div>
+                        </div>
                       </div>
                     )}
 

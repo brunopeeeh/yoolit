@@ -16,6 +16,8 @@ interface Task {
   completion_rules: string | null;
   points: number;
   deadline: string;
+  task_type: 'simple' | 'checklist';
+  checklist_items: Array<{ id: string; description: string; points: number }> | null;
 }
 
 interface TaskCompletion {
@@ -51,7 +53,7 @@ export const AgentTasks = () => {
       if (tasksResult.error) throw tasksResult.error;
       if (completionsResult.error) throw completionsResult.error;
 
-      setTasks(tasksResult.data || []);
+      setTasks((tasksResult.data || []) as unknown as Task[]);
       setCompletions(completionsResult.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -119,7 +121,7 @@ export const AgentTasks = () => {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {task.completion_rules && (
+                    {task.task_type === 'simple' && task.completion_rules && (
                       <div className="p-3 bg-muted rounded-lg space-y-2">
                         <div className="flex items-center gap-2 font-semibold text-sm">
                           <ListChecks className="h-4 w-4" />
@@ -128,6 +130,17 @@ export const AgentTasks = () => {
                         <p className="text-sm text-muted-foreground whitespace-pre-line">
                           {task.completion_rules}
                         </p>
+                      </div>
+                    )}
+                    {task.task_type === 'checklist' && task.checklist_items && (
+                      <div className="p-3 bg-muted rounded-lg space-y-2">
+                        <div className="flex items-center gap-2 font-semibold text-sm">
+                          <ListChecks className="h-4 w-4" />
+                          Checklist ({task.checklist_items.length} itens)
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Complete os itens para ganhar pontos
+                        </div>
                       </div>
                     )}
                     <div className="flex items-center justify-between">

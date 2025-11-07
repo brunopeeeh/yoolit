@@ -21,6 +21,8 @@ interface Task {
   deadline: string;
   is_active: boolean;
   created_at: string;
+  task_type: 'simple' | 'checklist';
+  checklist_items: Array<{ id: string; description: string; points: number }> | null;
 }
 
 export const TasksManagement = () => {
@@ -39,7 +41,7 @@ export const TasksManagement = () => {
         .order('deadline', { ascending: true });
 
       if (error) throw error;
-      setTasks(data || []);
+      setTasks((data || []) as unknown as Task[]);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -106,6 +108,7 @@ export const TasksManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Tarefa</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Pontos</TableHead>
                 <TableHead>Prazo</TableHead>
                 <TableHead>Status</TableHead>
@@ -121,13 +124,23 @@ export const TasksManagement = () => {
                       {task.description && (
                         <p className="text-sm text-muted-foreground">{task.description}</p>
                       )}
-                      {task.completion_rules && (
+                      {task.task_type === 'simple' && task.completion_rules && (
                         <p className="text-xs text-muted-foreground mt-1">
                           📋 Regras: {task.completion_rules.substring(0, 80)}
                           {task.completion_rules.length > 80 ? '...' : ''}
                         </p>
                       )}
+                      {task.task_type === 'checklist' && task.checklist_items && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ✓ {task.checklist_items.length} itens na checklist
+                        </p>
+                      )}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {task.task_type === 'simple' ? 'Simples' : 'Checklist'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">

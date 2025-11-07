@@ -480,6 +480,7 @@ export type Database = {
       task_completions: {
         Row: {
           completed_at: string
+          completed_items: Json | null
           id: string
           links: string | null
           notes: string | null
@@ -491,6 +492,7 @@ export type Database = {
         }
         Insert: {
           completed_at?: string
+          completed_items?: Json | null
           id?: string
           links?: string | null
           notes?: string | null
@@ -502,6 +504,7 @@ export type Database = {
         }
         Update: {
           completed_at?: string
+          completed_items?: Json | null
           id?: string
           links?: string | null
           notes?: string | null
@@ -537,6 +540,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          checklist_items: Json | null
           completion_rules: string | null
           created_at: string
           created_by: string
@@ -545,10 +549,12 @@ export type Database = {
           id: string
           is_active: boolean
           points: number
+          task_type: string
           title: string
           updated_at: string
         }
         Insert: {
+          checklist_items?: Json | null
           completion_rules?: string | null
           created_at?: string
           created_by: string
@@ -557,10 +563,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           points?: number
+          task_type?: string
           title: string
           updated_at?: string
         }
         Update: {
+          checklist_items?: Json | null
           completion_rules?: string | null
           created_at?: string
           created_by?: string
@@ -569,6 +577,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           points?: number
+          task_type?: string
           title?: string
           updated_at?: string
         }
