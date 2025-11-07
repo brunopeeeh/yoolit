@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
@@ -44,14 +44,15 @@ const ChatInput = ({ onSendMessage, onClear, disabled = false, onCommand }: Chat
 
   return (
     <form onSubmit={handleSubmit} className="border-t bg-background p-3 sm:p-6">
-      <div className="flex gap-2 sm:gap-3 items-center max-w-4xl mx-auto">
-        <Input
+      <div className="flex gap-2 sm:gap-3 items-end max-w-4xl mx-auto">
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={disabled ? "Faça login para enviar mensagens" : "Digite sua mensagem..."}
-          className="flex-1 text-sm sm:text-base"
+          className="flex-1 text-sm sm:text-base min-h-[40px] max-h-[200px] resize-none"
           disabled={disabled}
+          rows={1}
         />
         {onClear && (
           <Button
