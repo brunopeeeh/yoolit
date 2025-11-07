@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 
 interface Wallet {
   points: number;
@@ -58,8 +58,8 @@ export const WalletCard = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Coins className="h-5 w-5 text-yellow-500" />
-          Minha Carteira
+          <Wallet className="h-5 w-5 text-yellow-500" />
+          Minha Wallet
         </CardTitle>
         <CardDescription>Seus pontos e estatísticas</CardDescription>
       </CardHeader>
