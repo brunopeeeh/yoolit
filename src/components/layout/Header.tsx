@@ -1,4 +1,4 @@
-import { User as UserIcon, Shield } from "lucide-react";
+import { User as UserIcon, Shield, SquareArrowOutUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPopover from "./LoginPopover";
 import { useState, useEffect } from "react";
@@ -75,9 +75,9 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
                 const adminUrl = isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard';
                 window.open(adminUrl, '_blank');
               }}
-              title="Abrir Painel Administrativo"
+              title="Abrir Dashboard"
             >
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+              <SquareArrowOutUpRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           )}
           
