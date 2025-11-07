@@ -3,9 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Coins, ShoppingCart, Package, ImageIcon } from 'lucide-react';
+import { Coins, ShoppingCart, Package, ImageIcon, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { WalletCard } from './WalletCard';
+import { PurchaseTicket } from './PurchaseTicket';
+import { MyPurchasesDialog } from './MyPurchasesDialog';
 
 interface RewardItem {
   id: string;
@@ -36,6 +38,9 @@ export const RewardsStore = () => {
   const [rewards, setRewards] = useState<RewardItem[]>([]);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [lastPurchase, setLastPurchase] = useState<any>(null);
   const { toast } = useToast();
 
   const fetchData = async () => {
@@ -140,18 +145,37 @@ export const RewardsStore = () => {
         }
       }
 
-      const { error } = await supabase.from('reward_purchases').insert({
-        reward_id: reward.id,
-        user_id: user.id,
-        points_spent: reward.cost,
-      });
+      const { data: purchaseData, error } = await supabase
+        .from('reward_purchases')
+        .insert({
+          reward_id: reward.id,
+          user_id: user.id,
+          points_spent: reward.cost,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast({
-        title: 'Compra realizada!',
-        description: 'Aguarde a aprovação do supervisor',
+      // Get user profile for ticket
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', user.id)
+        .single();
+
+      // Set purchase data for ticket
+      setLastPurchase({
+        id: purchaseData.id,
+        rewardName: reward.name,
+        rewardCategory: reward.category,
+        pointsSpent: reward.cost,
+        purchasedAt: purchaseData.purchased_at,
+        userName: profile?.name || '',
       });
+
+      // Show ticket
+      setTicketOpen(true);
 
       fetchData();
     } catch (error) {
@@ -170,7 +194,17 @@ export const RewardsStore = () => {
 
   return (
     <div className="space-y-6">
-      <WalletCard />
+      <div className="flex items-center justify-between">
+        <WalletCard />
+        <Button
+          variant="outline"
+          onClick={() => setHistoryOpen(true)}
+          className="gap-2"
+        >
+          <History className="h-4 w-4" />
+          Meu Histórico
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
@@ -248,6 +282,17 @@ export const RewardsStore = () => {
           </div>
         </CardContent>
       </Card>
+
+      <PurchaseTicket
+        open={ticketOpen}
+        onOpenChange={setTicketOpen}
+        purchase={lastPurchase}
+      />
+
+      <MyPurchasesDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+      />
     </div>
   );
 };
