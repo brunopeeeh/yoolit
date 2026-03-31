@@ -237,6 +237,16 @@ export const TasksManagement = () => {
           onUpdate={fetchTasks}
         />
       )}
+
+      {auditTask && (
+        <ChatUsageAuditDialog
+          taskId={auditTask.id}
+          taskTitle={auditTask.title}
+          chatTargetCount={auditTask.chat_target_count || 0}
+          open={!!auditTask}
+          onOpenChange={(open) => !open && setAuditTask(null)}
+        />
+      )}
     </div>
   );
 };
