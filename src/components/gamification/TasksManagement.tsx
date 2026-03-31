@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil } from 'lucide-react';
+import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare } from 'lucide-react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
 import { TasksRanking } from './TasksRanking';
+import { ChatUsageAuditDialog } from '@/components/admin/ChatUsageAuditDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
