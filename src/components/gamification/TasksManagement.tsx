@@ -36,6 +36,7 @@ export const TasksManagement = () => {
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [auditTask, setAuditTask] = useState<Task | null>(null);
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchTasks = async () => {
