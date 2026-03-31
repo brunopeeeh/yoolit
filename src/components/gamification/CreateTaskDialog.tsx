@@ -23,13 +23,14 @@ interface ChecklistItem {
 
 export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [taskType, setTaskType] = useState<'simple' | 'checklist'>('simple');
+  const [taskType, setTaskType] = useState<'simple' | 'checklist' | 'chat_usage'>('simple');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     completion_rules: '',
     points: '',
     deadline: '',
+    chat_target_count: '',
   });
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const { toast } = useToast();
