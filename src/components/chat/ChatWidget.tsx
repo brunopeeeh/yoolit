@@ -6,6 +6,7 @@ import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ProjectVersion from "./ProjectVersion";
 import { N8NClient } from "@/lib/n8n";
+import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import packageJson from "../../../package.json";
 
