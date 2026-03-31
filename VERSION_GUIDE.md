@@ -35,13 +35,13 @@ Use os comandos do npm para atualizar automaticamente:
 
 ```bash
 # Patch (0.0.1 -> 0.0.2) - Para correções de bugs
-npm version patch
+npm version patch --no-git-tag-version
 
 # Minor (0.0.1 -> 0.1.0) - Para novas funcionalidades
-npm version minor
+npm version minor --no-git-tag-version
 
 # Major (0.1.0 -> 1.0.0) - Para mudanças que quebram compatibilidade
-npm version major
+npm version major --no-git-tag-version
 
 # Versão específica
 npm version 1.2.3
