@@ -126,6 +126,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_categories: {
+        Row: {
+          "  created_at": string
+          "  id": string
+          "  label": string
+          "  name": string
+        }
+        Insert: {
+          "  created_at"?: string
+          "  id"?: string
+          "  label": string
+          "  name": string
+        }
+        Update: {
+          "  created_at"?: string
+          "  id"?: string
+          "  label"?: string
+          "  name"?: string
+        }
+        Relationships: []
+      }
       reward_items: {
         Row: {
           category: string
@@ -550,10 +571,11 @@ export type Database = {
           completion_rules: string | null
           created_at: string
           created_by: string
-          deadline: string
+          deadline: string | null
           description: string | null
           id: string
           is_active: boolean
+          is_recurring: boolean
           points: number
           task_type: string
           title: string
@@ -564,10 +586,11 @@ export type Database = {
           completion_rules?: string | null
           created_at?: string
           created_by: string
-          deadline: string
+          deadline?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          is_recurring?: boolean
           points?: number
           task_type?: string
           title: string
@@ -578,10 +601,11 @@ export type Database = {
           completion_rules?: string | null
           created_at?: string
           created_by?: string
-          deadline?: string
+          deadline?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          is_recurring?: boolean
           points?: number
           task_type?: string
           title?: string
@@ -626,6 +650,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_custom_user: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
