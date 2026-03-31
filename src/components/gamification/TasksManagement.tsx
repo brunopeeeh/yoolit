@@ -34,6 +34,7 @@ export const TasksManagement = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [auditTask, setAuditTask] = useState<Task | null>(null);
   const { toast } = useToast();
 
   const fetchTasks = async () => {
