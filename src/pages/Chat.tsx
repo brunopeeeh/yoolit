@@ -89,6 +89,7 @@ const Chat = () => {
         onUserChange={setUser} 
         onProfileChange={handleProfileChange}
       />
+      <ChatTaskProgress userId={user?.id} />
       <div className="flex-1 overflow-hidden page-enter">
         <ChatWidget user={user} profile={profile} />
       </div>
