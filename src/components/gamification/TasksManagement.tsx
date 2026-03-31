@@ -196,7 +196,6 @@ export const TasksManagement = () => {
                           Auditoria
                         </Button>
                       )}
-                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
