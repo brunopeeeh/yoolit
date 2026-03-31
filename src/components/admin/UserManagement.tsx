@@ -85,6 +85,29 @@ export const UserManagement = () => {
     fetchProfiles();
   };
 
+  const handleDeleteAgent = async (profile: Profile) => {
+    try {
+      const { error } = await supabase.rpc('delete_custom_user', {
+        target_user_id: profile.id
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso',
+        description: `Agente ${profile.name || profile.email} excluído com sucesso`,
+      });
+      fetchProfiles();
+    } catch (error: any) {
+      console.error('Error deleting agent:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível excluir o agente',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'default';
