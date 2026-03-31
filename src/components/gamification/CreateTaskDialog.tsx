@@ -148,13 +148,14 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
           
           <div>
             <Label htmlFor="taskType">Tipo de Tarefa *</Label>
-            <Select value={taskType} onValueChange={(value: 'simple' | 'checklist') => setTaskType(value)}>
+            <Select value={taskType} onValueChange={(value: 'simple' | 'checklist' | 'chat_usage') => setTaskType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="simple">Tarefa Simples</SelectItem>
                 <SelectItem value="checklist">Checklist (To-Do List)</SelectItem>
+                <SelectItem value="chat_usage">Uso do Chat</SelectItem>
               </SelectContent>
             </Select>
           </div>
