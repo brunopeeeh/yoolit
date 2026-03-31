@@ -141,6 +141,11 @@ export const TasksManagement = () => {
                           ✓ {task.checklist_items.length} itens na checklist
                         </p>
                       )}
+                      {task.task_type === 'chat_usage' && task.chat_target_count && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          💬 Meta: {task.chat_target_count} mensagens
+                        </p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
