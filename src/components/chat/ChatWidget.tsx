@@ -6,6 +6,7 @@ import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ProjectVersion from "./ProjectVersion";
 import { N8NClient } from "@/lib/n8n";
+import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import packageJson from "../../../package.json";
 
@@ -58,6 +59,20 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
     
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
+
+    // Log chat usage for audit/gamification
+    if (user?.id) {
+      supabase
+        .from('chat_usage_logs')
+        .insert({
+          user_id: user.id,
+          session_id: sessionId,
+          message_content: content,
+        })
+        .then(({ error }) => {
+          if (error) console.error('Error logging chat usage:', error);
+        });
+    }
 
     try {
       console.log('Sending message with profile status:', profile?.status);

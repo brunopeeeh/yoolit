@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil } from 'lucide-react';
+import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare } from 'lucide-react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
 import { TasksRanking } from './TasksRanking';
+import { ChatUsageAuditDialog } from '@/components/admin/ChatUsageAuditDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -22,8 +23,9 @@ interface Task {
   deadline: string;
   is_active: boolean;
   created_at: string;
-  task_type: 'simple' | 'checklist';
+  task_type: 'simple' | 'checklist' | 'chat_usage';
   checklist_items: Array<{ id: string; description: string; points: number }> | null;
+  chat_target_count: number | null;
 }
 
 export const TasksManagement = () => {
@@ -32,6 +34,7 @@ export const TasksManagement = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [auditTask, setAuditTask] = useState<Task | null>(null);
   const { toast } = useToast();
 
   const fetchTasks = async () => {
@@ -138,11 +141,16 @@ export const TasksManagement = () => {
                           ✓ {task.checklist_items.length} itens na checklist
                         </p>
                       )}
+                      {task.task_type === 'chat_usage' && task.chat_target_count && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          💬 Meta: {task.chat_target_count} mensagens
+                        </p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {task.task_type === 'simple' ? 'Simples' : 'Checklist'}
+                      {task.task_type === 'simple' ? 'Simples' : task.task_type === 'checklist' ? 'Checklist' : 'Uso do Chat'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -178,6 +186,16 @@ export const TasksManagement = () => {
                       >
                         Ver Conclusões
                       </Button>
+                      {task.task_type === 'chat_usage' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setAuditTask(task)}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Auditoria
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -217,6 +235,16 @@ export const TasksManagement = () => {
           open={!!selectedTask}
           onOpenChange={(open) => !open && setSelectedTask(null)}
           onUpdate={fetchTasks}
+        />
+      )}
+
+      {auditTask && (
+        <ChatUsageAuditDialog
+          taskId={auditTask.id}
+          taskTitle={auditTask.title}
+          chatTargetCount={auditTask.chat_target_count || 0}
+          open={!!auditTask}
+          onOpenChange={(open) => !open && setAuditTask(null)}
         />
       )}
     </div>

@@ -23,13 +23,14 @@ interface ChecklistItem {
 
 export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [taskType, setTaskType] = useState<'simple' | 'checklist'>('simple');
+  const [taskType, setTaskType] = useState<'simple' | 'checklist' | 'chat_usage'>('simple');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     completion_rules: '',
     points: '',
     deadline: '',
+    chat_target_count: '',
   });
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const { toast } = useToast();
@@ -81,9 +82,13 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
       if (taskType === 'simple') {
         taskData.completion_rules = formData.completion_rules || null;
         taskData.points = parseInt(formData.points);
-      } else {
+      } else if (taskType === 'checklist') {
         taskData.checklist_items = checklistItems;
         taskData.points = getTotalPoints();
+      } else if (taskType === 'chat_usage') {
+        taskData.points = parseInt(formData.points);
+        taskData.chat_target_count = parseInt(formData.chat_target_count);
+        taskData.completion_rules = formData.completion_rules || null;
       }
 
       const { error } = await supabase.from('tasks').insert(taskData);
@@ -95,7 +100,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
         description: 'Tarefa criada com sucesso',
       });
 
-      setFormData({ title: '', description: '', completion_rules: '', points: '', deadline: '' });
+      setFormData({ title: '', description: '', completion_rules: '', points: '', deadline: '', chat_target_count: '' });
       setChecklistItems([]);
       setTaskType('simple');
       onSuccess();
@@ -143,13 +148,14 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
           
           <div>
             <Label htmlFor="taskType">Tipo de Tarefa *</Label>
-            <Select value={taskType} onValueChange={(value: 'simple' | 'checklist') => setTaskType(value)}>
+            <Select value={taskType} onValueChange={(value: 'simple' | 'checklist' | 'chat_usage') => setTaskType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="simple">Tarefa Simples</SelectItem>
                 <SelectItem value="checklist">Checklist (To-Do List)</SelectItem>
+                <SelectItem value="chat_usage">Uso do Chat</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -163,6 +169,42 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
                   value={formData.completion_rules}
                   onChange={(e) => setFormData({ ...formData, completion_rules: e.target.value })}
                   placeholder="Ex: Enviar print da tela, preencher formulário, realizar venda acima de X"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label htmlFor="points">Pontos *</Label>
+                <Input
+                  id="points"
+                  type="number"
+                  min="1"
+                  value={formData.points}
+                  onChange={(e) => setFormData({ ...formData, points: e.target.value })}
+                  required
+                />
+              </div>
+            </>
+          ) : taskType === 'chat_usage' ? (
+            <>
+              <div>
+                <Label htmlFor="chat_target_count">Quantidade de mensagens necessárias *</Label>
+                <Input
+                  id="chat_target_count"
+                  type="number"
+                  min="1"
+                  value={formData.chat_target_count}
+                  onChange={(e) => setFormData({ ...formData, chat_target_count: e.target.value })}
+                  placeholder="Ex: 10"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="completion_rules">Regras / Descrição da auditoria</Label>
+                <Textarea
+                  id="completion_rules"
+                  value={formData.completion_rules}
+                  onChange={(e) => setFormData({ ...formData, completion_rules: e.target.value })}
+                  placeholder="Ex: Enviar perguntas relevantes sobre atendimento ao cliente"
                   rows={3}
                 />
               </div>
