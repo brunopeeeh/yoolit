@@ -96,6 +96,30 @@ export type Database = {
           },
         ]
       }
+      chat_usage_logs: {
+        Row: {
+          created_at: string
+          id: string
+          message_content: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_content: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_content?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -567,6 +591,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          chat_target_count: number | null
           checklist_items: Json | null
           completion_rules: string | null
           created_at: string
@@ -582,6 +607,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          chat_target_count?: number | null
           checklist_items?: Json | null
           completion_rules?: string | null
           created_at?: string
@@ -597,6 +623,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          chat_target_count?: number | null
           checklist_items?: Json | null
           completion_rules?: string | null
           created_at?: string
