@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare, Trash2 } from 'lucide-react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
@@ -35,6 +36,7 @@ export const TasksManagement = () => {
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [auditTask, setAuditTask] = useState<Task | null>(null);
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchTasks = async () => {
@@ -81,6 +83,31 @@ export const TasksManagement = () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível atualizar a tarefa',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteTask = async (taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso',
+        description: 'Tarefa excluída com sucesso',
+      });
+      setDeletingTaskId(null);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir a tarefa',
         variant: 'destructive',
       });
     }
@@ -207,6 +234,14 @@ export const TasksManagement = () => {
                           <CheckCircle className="h-4 w-4" />
                         )}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingTaskId(task.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -248,6 +283,26 @@ export const TasksManagement = () => {
           onOpenChange={(open) => !open && setAuditTask(null)}
         />
       )}
+
+      <AlertDialog open={!!deletingTaskId} onOpenChange={(open) => !open && setDeletingTaskId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir tarefa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A tarefa e todas as suas conclusões serão removidas permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingTaskId && deleteTask(deletingTaskId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
