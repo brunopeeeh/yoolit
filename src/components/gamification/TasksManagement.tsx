@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Plus, Calendar, Award, CheckCircle, XCircle, Pencil, MessageSquare, Trash2 } from 'lucide-react';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TaskCompletionsDialog } from './TaskCompletionsDialog';
