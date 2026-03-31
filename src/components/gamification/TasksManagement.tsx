@@ -23,8 +23,9 @@ interface Task {
   deadline: string;
   is_active: boolean;
   created_at: string;
-  task_type: 'simple' | 'checklist';
+  task_type: 'simple' | 'checklist' | 'chat_usage';
   checklist_items: Array<{ id: string; description: string; points: number }> | null;
+  chat_target_count: number | null;
 }
 
 export const TasksManagement = () => {
