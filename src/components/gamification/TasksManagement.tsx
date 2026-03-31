@@ -150,7 +150,7 @@ export const TasksManagement = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {task.task_type === 'simple' ? 'Simples' : 'Checklist'}
+                      {task.task_type === 'simple' ? 'Simples' : task.task_type === 'checklist' ? 'Checklist' : 'Uso do Chat'}
                     </Badge>
                   </TableCell>
                   <TableCell>
