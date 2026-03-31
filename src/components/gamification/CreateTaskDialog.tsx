@@ -82,9 +82,13 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
       if (taskType === 'simple') {
         taskData.completion_rules = formData.completion_rules || null;
         taskData.points = parseInt(formData.points);
-      } else {
+      } else if (taskType === 'checklist') {
         taskData.checklist_items = checklistItems;
         taskData.points = getTotalPoints();
+      } else if (taskType === 'chat_usage') {
+        taskData.points = parseInt(formData.points);
+        taskData.chat_target_count = parseInt(formData.chat_target_count);
+        taskData.completion_rules = formData.completion_rules || null;
       }
 
       const { error } = await supabase.from('tasks').insert(taskData);
