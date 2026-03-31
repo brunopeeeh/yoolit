@@ -184,6 +184,42 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
                 />
               </div>
             </>
+          ) : taskType === 'chat_usage' ? (
+            <>
+              <div>
+                <Label htmlFor="chat_target_count">Quantidade de mensagens necessárias *</Label>
+                <Input
+                  id="chat_target_count"
+                  type="number"
+                  min="1"
+                  value={formData.chat_target_count}
+                  onChange={(e) => setFormData({ ...formData, chat_target_count: e.target.value })}
+                  placeholder="Ex: 10"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="completion_rules">Regras / Descrição da auditoria</Label>
+                <Textarea
+                  id="completion_rules"
+                  value={formData.completion_rules}
+                  onChange={(e) => setFormData({ ...formData, completion_rules: e.target.value })}
+                  placeholder="Ex: Enviar perguntas relevantes sobre atendimento ao cliente"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label htmlFor="points">Pontos *</Label>
+                <Input
+                  id="points"
+                  type="number"
+                  min="1"
+                  value={formData.points}
+                  onChange={(e) => setFormData({ ...formData, points: e.target.value })}
+                  required
+                />
+              </div>
+            </>
           ) : (
             <div>
               <div className="flex items-center justify-between mb-2">
