@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ChatWidget from "@/components/chat/ChatWidget";
+import ChatTaskProgress from "@/components/chat/ChatTaskProgress";
 import Header from "@/components/layout/Header";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
