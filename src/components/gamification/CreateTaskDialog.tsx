@@ -100,7 +100,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
         description: 'Tarefa criada com sucesso',
       });
 
-      setFormData({ title: '', description: '', completion_rules: '', points: '', deadline: '' });
+      setFormData({ title: '', description: '', completion_rules: '', points: '', deadline: '', chat_target_count: '' });
       setChecklistItems([]);
       setTaskType('simple');
       onSuccess();
