@@ -1,0 +1,2 @@
+ALTER TABLE public.tasks DROP CONSTRAINT task_type_check;
+ALTER TABLE public.tasks ADD CONSTRAINT task_type_check CHECK (task_type = ANY (ARRAY['simple'::text, 'checklist'::text, 'chat_usage'::text]));
