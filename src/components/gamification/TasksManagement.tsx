@@ -88,6 +88,31 @@ export const TasksManagement = () => {
     }
   };
 
+  const deleteTask = async (taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso',
+        description: 'Tarefa excluída com sucesso',
+      });
+      setDeletingTaskId(null);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir a tarefa',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (isLoading) {
     return <div>Carregando...</div>;
   }
