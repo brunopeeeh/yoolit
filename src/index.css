@@ -147,21 +147,123 @@ All colors MUST be HSL.
   }
 }
 
-/* scrollbar */
+/* ── Header gradient animado ─────────────────────────────── */
+.header-gradient {
+  background: linear-gradient(
+    135deg,
+    #83cef6,
+    #4db5ef,
+    #1a9fd4,
+    #0a639a,
+    #0d7ab8,
+    #1a8ac5,
+    #5ab8ef,
+    #83cef6
+  );
+  background-size: 400% 400%;
+  animation: header-gradient-shift 12s ease infinite;
+}
+
+@keyframes header-gradient-shift {
+  0%   { background-position: 0%   50%; }
+  25%  { background-position: 50%  100%; }
+  50%  { background-position: 100% 50%; }
+  75%  { background-position: 50%  0%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* Brilho em movimento sobre o header */
+.header-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: header-shimmer 6s ease-in-out infinite;
+}
+
+@keyframes header-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Ícone Sparkles pulsando suavemente */
+.sparkle-pulse {
+  animation: sparkle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1)    rotate(0deg);   }
+  30%       { opacity: 0.85; transform: scale(1.08) rotate(8deg);  }
+  60%       { opacity: 1;    transform: scale(0.96) rotate(-4deg); }
+}
+
+/* ── Transições gerais de página ─────────────────────────── */
+.page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Tab content fade ────────────────────────────────────── */
+[role="tabpanel"] {
+  animation: tab-fade 0.25s ease both;
+}
+
+@keyframes tab-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Botões com spring suave ─────────────────────────────── */
+button, [role="button"] {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.15s ease,
+              background-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+/* ── Cards com hover lift ────────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1),
+              box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* ── scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
-	@apply h-[4px] w-[4px];
+	@apply h-[3px] w-[3px];
 }
 
 ::-webkit-scrollbar-track {
-	@apply bg-gray-200;
+	@apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-	@apply bg-primary;
+	@apply bg-border rounded-full;
+  transition: background-color 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	@apply bg-gray-600;
+	@apply bg-muted-foreground/30;
 }
 
 @layer base {
@@ -219,14 +321,9 @@ All colors MUST be HSL.
   }
 
   @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
+
 }

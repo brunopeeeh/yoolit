@@ -1,4 +1,4 @@
-import { User as UserIcon, Shield, SquareArrowOutUpRight } from "lucide-react";
+import { User as UserIcon, SquareArrowOutUpRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginPopover from "./LoginPopover";
 import { useState, useEffect } from "react";
@@ -50,61 +50,66 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
     console.log('Header - Location:', location.pathname);
   }, [user, isAdmin, rolesLoading, location]);
 
-  // Usar diretamente o profile prop em vez de estado local
-  // para garantir que sempre reflita o estado mais atual
   const currentStatusObj = profile?.status 
-    ? statuses.find((s) => s.value === profile.status) || statuses[6] // default para "available"
-    : statuses[6]; // default para "available"
+    ? statuses.find((s) => s.value === profile.status) || statuses[6]
+    : statuses[6];
   
   const CurrentStatusIcon = currentStatusObj.icon;
+
   return (
-    <header className="bg-gradient-to-r from-[#83cef6] to-[#0a639a] text-white py-2 px-4 sm:py-4 sm:px-6 shadow-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-14 sm:h-16">
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <h1 className="text-sm sm:text-2xl font-bold truncate leading-none">Maya</h1>
-          <p className="text-xs sm:text-sm leading-none mt-1 sm:mt-1">Utilize Maya e tenha auxilio nos atendimentos! 😇</p>
+    <header className="header-gradient header-shimmer relative text-white shadow-lg overflow-hidden">
+      <div className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-[60px] sm:h-[68px]">
+        
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-inner">
+            <Sparkles className="sparkle-pulse h-4 w-4 sm:h-4 sm:w-4 text-white" />
+          </div>
+          <div className="flex flex-col justify-center leading-none">
+            <h1 className="text-base sm:text-xl font-bold tracking-tight">Maya</h1>
+            <p className="text-[10px] sm:text-xs text-white/75 mt-0.5 hidden xs:block">Auxílio inteligente para atendimentos</p>
+          </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {hasAdminAccess && (
             <Button
               size="icon"
               variant="ghost"
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105"
               onClick={() => {
                 const adminUrl = isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard';
                 window.open(adminUrl, '_blank');
               }}
               title="Abrir Dashboard"
             >
-              <SquareArrowOutUpRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              <SquareArrowOutUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           )}
           
           <LoginPopover
-          user={user}
-          profile={profile}
-          onUserChange={onUserChange}
-          onProfileChange={onProfileChange}
-          isOpen={isLoginOpen}
-          onOpenChange={setIsLoginOpen}
-        >
+            user={user}
+            profile={profile}
+            onUserChange={onUserChange}
+            onProfileChange={onProfileChange}
+            isOpen={isLoginOpen}
+            onOpenChange={setIsLoginOpen}
+          >
             <div className="relative flex-shrink-0">
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105"
               >
-                <UserIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <UserIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
               {user && profile && (
-                   <div 
-                     className="absolute -bottom-0.5 -left-0.5 sm:-bottom-1 sm:-left-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center border-2 border-white"
-                     style={{ backgroundColor: currentStatusObj.color }}
-                   >
-                     <CurrentStatusIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
-                   </div>
-                 )}
+                <div 
+                  className="absolute -bottom-1 -left-1 h-4 w-4 sm:h-4.5 sm:w-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
+                  style={{ backgroundColor: currentStatusObj.color }}
+                >
+                  <CurrentStatusIcon className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-white" />
+                </div>
+              )}
             </div>
           </LoginPopover>
         </div>

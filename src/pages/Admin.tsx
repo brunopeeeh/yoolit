@@ -80,9 +80,10 @@ const Admin = () => {
   // Mostra loading enquanto carrega
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="flex items-center justify-center h-screen">
-          <p className="text-muted-foreground">Carregando...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-[#83cef6] border-t-transparent animate-spin" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
@@ -101,62 +102,69 @@ const Admin = () => {
         onUserChange={() => {}}
         onProfileChange={setProfile}
       />
-      <main className="container mx-auto py-8 px-4">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              {new Date().toLocaleDateString('pt-BR', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-              })}
-            </p>
+
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-base sm:text-lg font-semibold tracking-tight">Painel</h1>
+              <span className="hidden sm:block text-muted-foreground/30 select-none">·</span>
+              <p className="hidden sm:block text-xs text-muted-foreground">
+                {new Date().toLocaleDateString('pt-BR', { 
+                  weekday: 'short', 
+                  day: 'numeric', 
+                  month: 'short',
+                })}
+              </p>
+            </div>
           </div>
         </div>
+      </div>
 
+      <main className="container mx-auto py-6 px-4 page-enter">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className={isAgent && !isAdmin ? "grid w-full grid-cols-3" : "grid w-full grid-cols-8"}>
-            {!isAgent || isAdmin ? (
-              <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Dashboard
+          <div className="overflow-x-auto pb-1 -mx-1 px-1">
+            <TabsList className="inline-flex h-9 items-center gap-0.5 rounded-xl bg-muted/60 p-1 border border-border/40 w-max min-w-full sm:w-auto">
+              {!isAgent || isAdmin ? (
+                <TabsTrigger value="dashboard" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Dashboard
+                </TabsTrigger>
+              ) : null}
+              <TabsTrigger value="tasks" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                <Trophy className="h-3.5 w-3.5" />
+                Tarefas
               </TabsTrigger>
-            ) : null}
-            <TabsTrigger value="tasks" className="flex items-center gap-2">
-              <Trophy className="h-4 w-4" />
-              Tarefas
-            </TabsTrigger>
-            <TabsTrigger value="store" className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Loja
-            </TabsTrigger>
-            <TabsTrigger value="swap-requests" className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Trocas
-            </TabsTrigger>
-            {!isAgent || isAdmin ? (
-              <>
-                <TabsTrigger value="users" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Agentes
-                </TabsTrigger>
-                <TabsTrigger value="shifts" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Escalas
-                </TabsTrigger>
-                <TabsTrigger value="manage-tasks" className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  Ger. Tarefas
-                </TabsTrigger>
-                <TabsTrigger value="manage-rewards" className="flex items-center gap-2">
-                  <Gift className="h-4 w-4" />
-                  Ger. Recompensas
-                </TabsTrigger>
-              </>
-            ) : null}
-          </TabsList>
+              <TabsTrigger value="store" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                <ShoppingBag className="h-3.5 w-3.5" />
+                Loja
+              </TabsTrigger>
+              <TabsTrigger value="swap-requests" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                <RefreshCw className="h-3.5 w-3.5" />
+                Trocas
+              </TabsTrigger>
+              {!isAgent || isAdmin ? (
+                <>
+                  <TabsTrigger value="users" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                    <Users className="h-3.5 w-3.5" />
+                    Agentes
+                  </TabsTrigger>
+                  <TabsTrigger value="shifts" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Escalas
+                  </TabsTrigger>
+                  <TabsTrigger value="manage-tasks" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                    <Trophy className="h-3.5 w-3.5" />
+                    Ger. Tarefas
+                  </TabsTrigger>
+                  <TabsTrigger value="manage-rewards" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
+                    <Gift className="h-3.5 w-3.5" />
+                    Recompensas
+                  </TabsTrigger>
+                </>
+              ) : null}
+            </TabsList>
+          </div>
 
           {!isAgent || isAdmin ? (
             <TabsContent value="dashboard" className="mt-6 space-y-6">

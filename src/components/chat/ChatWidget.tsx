@@ -173,25 +173,22 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
    };
 
   return (
-    <div className="flex h-full flex-col max-w-6xl mx-auto px-2 sm:px-0">
-      {/* Messages */}
+    <div className="flex h-full flex-col max-w-5xl mx-auto">
       <ChatMessages messages={messages} isTyping={isTyping} />
 
-      {/* Login Alert (when not logged in) */}
       {!isLoggedIn && (
-        <div className="border-t bg-background p-4 sm:p-6">
-          <div className="max-w-4xl mx-auto mb-4">
-            <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800">
-              <LogInIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              <AlertDescription className="text-amber-800 dark:text-amber-300 text-sm">
-                Por favor, faça login para enviar mensagens
+        <div className="px-3 sm:px-6 pb-2">
+          <div className="max-w-4xl mx-auto">
+            <Alert className="bg-amber-50/80 border-amber-200/60 dark:bg-amber-950/30 dark:border-amber-800/40 rounded-xl py-2.5">
+              <LogInIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-amber-800 dark:text-amber-300 text-xs">
+                Faça login para enviar mensagens
               </AlertDescription>
             </Alert>
           </div>
         </div>
       )}
 
-      {/* Input */}
       <ChatInput 
         onSendMessage={handleSendMessage} 
         onClear={handleClearChat}
@@ -199,7 +196,6 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
         disabled={!isLoggedIn}
       />
       
-      {/* Project Version */}
       <ProjectVersion />
     </div>
   );

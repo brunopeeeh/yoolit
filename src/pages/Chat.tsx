@@ -88,7 +88,7 @@ const Chat = () => {
         onUserChange={setUser} 
         onProfileChange={handleProfileChange}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden page-enter">
         <ChatWidget user={user} profile={profile} />
       </div>
     </div>
