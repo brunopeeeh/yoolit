@@ -14,8 +14,8 @@ import { TasksManagement } from '@/components/gamification/TasksManagement';
 import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { RewardsStore } from '@/components/gamification/RewardsStore';
 import { RewardsManagement } from '@/components/gamification/RewardsManagement';
-import { BarChart3, Shield, Calendar, RefreshCw, Users, Trophy, ShoppingBag, Gift } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import { AdminNav } from '@/components/admin/AdminNav';
 
 const Admin = () => {
   const navigate = useNavigate();
