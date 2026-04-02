@@ -129,6 +129,25 @@ const Admin = () => {
     }
   };
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Listen for sidebar collapse state via DOM (simple approach)
+  useEffect(() => {
+    const checkSidebar = () => {
+      const sidebar = document.querySelector('aside');
+      if (sidebar) {
+        setSidebarCollapsed(sidebar.classList.contains('w-[52px]'));
+      }
+    };
+    const observer = new MutationObserver(checkSidebar);
+    const sidebar = document.querySelector('aside');
+    if (sidebar) {
+      observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+      checkSidebar();
+    }
+    return () => observer.disconnect();
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -145,8 +164,13 @@ const Admin = () => {
         isAgent={isAgent}
       />
 
-      <main className="container mx-auto py-6 px-4 page-enter">
-        {renderContent()}
+      <main className={cn(
+        'py-6 px-4 page-enter transition-all duration-300',
+        'md:' + (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
+      )}>
+        <div className="max-w-7xl mx-auto">
+          {renderContent()}
+        </div>
       </main>
     </div>
   );
