@@ -41,7 +41,6 @@ const Admin = () => {
     setSearchParams({ tab: newTab });
   };
 
-
   useEffect(() => {
     const getSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -66,36 +65,46 @@ const Admin = () => {
   }, [user]);
 
   useEffect(() => {
-    console.log('Admin access check:', { 
-      userId: user?.id, 
-      isAdmin, 
-      isLoading, 
-      rolesLoading 
-    });
-    
-    // Apenas redireciona se não houver usuário após loading
     if (!isLoading && !user) {
-      console.log('Redirecting to home - no user');
       navigate('/');
     }
   }, [user, isLoading, navigate]);
 
-  // Mostra loading enquanto carrega
+  // Track sidebar collapse state
+  useEffect(() => {
+    if (isMobile) return;
+    const checkSidebar = () => {
+      const sidebar = document.querySelector('aside');
+      if (sidebar) {
+        setSidebarCollapsed(sidebar.classList.contains('w-[52px]'));
+      }
+    };
+    const observer = new MutationObserver(checkSidebar);
+    const tick = setTimeout(() => {
+      const sidebar = document.querySelector('aside');
+      if (sidebar) {
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+        checkSidebar();
+      }
+    }, 100);
+    return () => {
+      clearTimeout(tick);
+      observer.disconnect();
+    };
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-[#83cef6] border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
   }
 
-  // Se não tem usuário, não renderiza (redirect acontece no useEffect)
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -133,24 +142,6 @@ const Admin = () => {
     }
   };
 
-  // Listen for sidebar collapse state via DOM
-  useEffect(() => {
-    if (isMobile) return;
-    const checkSidebar = () => {
-      const sidebar = document.querySelector('aside');
-      if (sidebar) {
-        setSidebarCollapsed(sidebar.classList.contains('w-[52px]'));
-      }
-    };
-    const observer = new MutationObserver(checkSidebar);
-    const sidebar = document.querySelector('aside');
-    if (sidebar) {
-      observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-      checkSidebar();
-    }
-    return () => observer.disconnect();
-  });
-
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -169,7 +160,7 @@ const Admin = () => {
 
       <main className={cn(
         'py-6 px-4 page-enter transition-all duration-300',
-        'md:' + (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
+        !isMobile && (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
       )}>
         <div className="max-w-7xl mx-auto">
           {renderContent()}
