@@ -93,6 +93,42 @@ const Admin = () => {
     return null;
   }
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        if (isAgent && !isAdmin) return null;
+        return (
+          <div className="space-y-6">
+            <DashboardStats
+              availableAgents={dashboardData.availableAgents}
+              totalAgents={dashboardData.totalAgents}
+              pendingSwaps={dashboardData.pendingSwaps}
+              approvedSwaps={dashboardData.approvedSwaps}
+              coverage={dashboardData.coverage}
+            />
+            <AgentScheduleChart />
+            <SwapCalendar />
+          </div>
+        );
+      case 'tasks':
+        return isAgent && !isAdmin ? <AgentTasks /> : <TasksManagement />;
+      case 'store':
+        return <RewardsStore />;
+      case 'swap-requests':
+        return <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />;
+      case 'users':
+        return (!isAgent || isAdmin) ? <UserManagement /> : null;
+      case 'shifts':
+        return (!isAgent || isAdmin) ? <AgentWeeklySchedule /> : null;
+      case 'manage-tasks':
+        return (!isAgent || isAdmin) ? <TasksManagement /> : null;
+      case 'manage-rewards':
+        return (!isAgent || isAdmin) ? <RewardsManagement /> : null;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -102,115 +138,15 @@ const Admin = () => {
         onProfileChange={setProfile}
       />
 
-      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-base sm:text-lg font-semibold tracking-tight">Painel</h1>
-              <span className="hidden sm:block text-muted-foreground/30 select-none">·</span>
-              <p className="hidden sm:block text-xs text-muted-foreground">
-                {new Date().toLocaleDateString('pt-BR', { 
-                  weekday: 'short', 
-                  day: 'numeric', 
-                  month: 'short',
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AdminNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isAdmin={isAdmin}
+        isAgent={isAgent}
+      />
 
       <main className="container mx-auto py-6 px-4 page-enter">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="overflow-x-auto pb-1 -mx-1 px-1">
-            <TabsList className="inline-flex h-9 items-center gap-0.5 rounded-xl bg-muted/60 p-1 border border-border/40 w-max min-w-full sm:w-auto">
-              {!isAgent || isAdmin ? (
-                <TabsTrigger value="dashboard" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Dashboard
-                </TabsTrigger>
-              ) : null}
-              <TabsTrigger value="tasks" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                <Trophy className="h-3.5 w-3.5" />
-                Tarefas
-              </TabsTrigger>
-              <TabsTrigger value="store" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                <ShoppingBag className="h-3.5 w-3.5" />
-                Loja
-              </TabsTrigger>
-              <TabsTrigger value="swap-requests" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                <RefreshCw className="h-3.5 w-3.5" />
-                Trocas
-              </TabsTrigger>
-              {!isAgent || isAdmin ? (
-                <>
-                  <TabsTrigger value="users" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                    <Users className="h-3.5 w-3.5" />
-                    Agentes
-                  </TabsTrigger>
-                  <TabsTrigger value="shifts" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Escalas
-                  </TabsTrigger>
-                  <TabsTrigger value="manage-tasks" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                    <Trophy className="h-3.5 w-3.5" />
-                    Ger. Tarefas
-                  </TabsTrigger>
-                  <TabsTrigger value="manage-rewards" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap">
-                    <Gift className="h-3.5 w-3.5" />
-                    Recompensas
-                  </TabsTrigger>
-                </>
-              ) : null}
-            </TabsList>
-          </div>
-
-          {!isAgent || isAdmin ? (
-            <TabsContent value="dashboard" className="mt-6 space-y-6">
-              <DashboardStats
-                availableAgents={dashboardData.availableAgents}
-                totalAgents={dashboardData.totalAgents}
-                pendingSwaps={dashboardData.pendingSwaps}
-                approvedSwaps={dashboardData.approvedSwaps}
-                coverage={dashboardData.coverage}
-              />
-              <AgentScheduleChart />
-              <SwapCalendar />
-            </TabsContent>
-          ) : null}
-
-          <TabsContent value="tasks" className="mt-6">
-            {isAgent && !isAdmin ? <AgentTasks /> : <TasksManagement />}
-          </TabsContent>
-
-          <TabsContent value="store" className="mt-6">
-            <RewardsStore />
-          </TabsContent>
-
-          <TabsContent value="swap-requests" className="mt-6">
-            <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />
-          </TabsContent>
-
-          {!isAgent || isAdmin ? (
-            <>
-              <TabsContent value="users" className="mt-6">
-                <UserManagement />
-              </TabsContent>
-
-              <TabsContent value="shifts" className="mt-6">
-                <AgentWeeklySchedule />
-              </TabsContent>
-
-              <TabsContent value="manage-tasks" className="mt-6">
-                <TasksManagement />
-              </TabsContent>
-
-              <TabsContent value="manage-rewards" className="mt-6">
-                <RewardsManagement />
-              </TabsContent>
-            </>
-          ) : null}
-        </Tabs>
+        {renderContent()}
       </main>
     </div>
   );
