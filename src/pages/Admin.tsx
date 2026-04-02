@@ -133,10 +133,9 @@ const Admin = () => {
     }
   };
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  // Listen for sidebar collapse state via DOM (simple approach)
+  // Listen for sidebar collapse state via DOM
   useEffect(() => {
+    if (isMobile) return;
     const checkSidebar = () => {
       const sidebar = document.querySelector('aside');
       if (sidebar) {
