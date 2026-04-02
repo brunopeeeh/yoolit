@@ -27,6 +27,8 @@ const Admin = () => {
   const { isAdmin, hasRole, isLoading: rolesLoading } = useRoles(user?.id);
   const isAgent = hasRole('agent');
   const activeTab = searchParams.get('tab') || (isAgent && !isAdmin ? 'tasks' : 'dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
   const [dashboardData, setDashboardData] = useState({
     availableAgents: 6,
     totalAgents: 13,
