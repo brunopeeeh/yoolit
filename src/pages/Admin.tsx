@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRoles } from '@/hooks/useRoles';
 import Header from '@/components/layout/Header';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { AgentScheduleChart } from '@/components/admin/AgentScheduleChart';
