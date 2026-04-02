@@ -58,6 +58,14 @@ All colors MUST be HSL.
   }
 
 @layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .shadow-main-ui {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   }
