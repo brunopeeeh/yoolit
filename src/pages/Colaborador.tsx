@@ -11,6 +11,7 @@ import { AgentScheduleView } from '@/components/colaborador/AgentScheduleView';
 import { ColaboradorNav } from '@/components/colaborador/ColaboradorNav';
 import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
+import { TodayScheduleCard } from '@/components/colaborador/TodayScheduleCard';
 import type { User } from '@supabase/supabase-js';
 
 const Colaborador = () => {
@@ -129,7 +130,7 @@ const Colaborador = () => {
         !isMobile && (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
       )}>
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex flex-col gap-1 mb-2">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight">
               Bem-vindo(a), {profile?.name || user.email?.split('@')[0] || 'Colaborador'}!
             </h1>
@@ -137,6 +138,9 @@ const Colaborador = () => {
               Acompanhe sua escala, realize trocas e confira suas tarefas e recompensas.
             </p>
           </div>
+
+          <TodayScheduleCard />
+
           {renderContent()}
         </div>
       </main>
