@@ -174,9 +174,13 @@ export const AgentWeeklySchedule = () => {
 
       toast.success('Horários salvos com sucesso!');
       fetchAgentSchedule(selectedAgentId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving schedules:', error);
-      toast.error('Erro ao salvar horários');
+      if (error?.code === '23503') {
+        toast.error('Não é possível alterar: o colaborador possui trocas de turno vinculadas a este horário.');
+      } else {
+        toast.error('Erro ao salvar horários');
+      }
     } finally {
       setIsSaving(false);
     }

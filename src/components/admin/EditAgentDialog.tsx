@@ -213,9 +213,13 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
       toast.success('Agente atualizado com sucesso!');
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating agent:', error);
-      toast.error('Erro ao atualizar agente');
+      if (error?.code === '23503') {
+        toast.error('Não é possível alterar a escala: existem trocas de turno vinculadas a este horário.');
+      } else {
+        toast.error('Erro ao atualizar agente');
+      }
     } finally {
       setIsSubmitting(false);
     }
