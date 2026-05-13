@@ -10,6 +10,7 @@ import { RewardsStore } from '@/components/gamification/RewardsStore';
 import { AgentScheduleView } from '@/components/colaborador/AgentScheduleView';
 import { ColaboradorNav } from '@/components/colaborador/ColaboradorNav';
 import { AgentTasks } from '@/components/gamification/AgentTasks';
+import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
 import type { User } from '@supabase/supabase-js';
 
 const Colaborador = () => {
@@ -96,6 +97,8 @@ const Colaborador = () => {
     switch (activeTab) {
       case 'schedule':
         return <AgentScheduleView />;
+      case 'global-schedule':
+        return <GlobalScheduleView />;
       case 'swap-requests':
         return <ShiftSwapRequests isAgentView={true} />;
       case 'tasks':
