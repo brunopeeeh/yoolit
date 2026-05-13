@@ -107,16 +107,22 @@ const Colaborador = () => {
     switch (activeTab) {
       case 'inicio':
         return (
-          <div className="space-y-2">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight">
-                {getGreeting()}, {firstName}!
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                Aqui está um resumo do seu dia de trabalho.
-              </p>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* Saudação */}
+              <div className="flex flex-col gap-1 sm:w-56 flex-shrink-0">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  {getGreeting()}, {firstName}!
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Aqui está um resumo do seu dia de trabalho.
+                </p>
+              </div>
+              {/* Card compacto ocupa o resto da linha */}
+              <div className="flex-1 w-full">
+                <TodayScheduleCard />
+              </div>
             </div>
-            <TodayScheduleCard />
           </div>
         );
       case 'schedule':
@@ -136,10 +142,10 @@ const Colaborador = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        user={user} 
+      <Header
+        user={user}
         profile={profile}
-        onUserChange={() => {}}
+        onUserChange={() => { }}
         onProfileChange={setProfile}
       />
 

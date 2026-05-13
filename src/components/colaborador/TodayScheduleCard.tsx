@@ -96,10 +96,10 @@ export const TodayScheduleCard = () => {
 
   if (isLoading) {
     return (
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a639a] to-[#0d4f7a] p-6 animate-pulse">
-        <div className="h-5 w-40 bg-white/20 rounded mb-3" />
-        <div className="h-10 w-28 bg-white/20 rounded mb-4" />
-        <div className="h-4 w-56 bg-white/20 rounded" />
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0a639a] to-[#0d4f7a] p-4 animate-pulse flex items-center gap-4">
+        <div className="h-4 w-24 bg-white/20 rounded" />
+        <div className="h-4 w-32 bg-white/20 rounded" />
+        <div className="h-4 w-32 bg-white/20 rounded" />
       </div>
     );
   }
@@ -107,23 +107,12 @@ export const TodayScheduleCard = () => {
   // Day off
   if (!schedule) {
     return (
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 p-6 text-white shadow-xl">
-        <div className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-white/5" />
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-white/50 mb-1">{todayName}</p>
-            <p className="text-4xl font-bold tabular-nums">{timeString}</p>
-            <p className="text-sm text-white/60 mt-1">{dateString}</p>
-          </div>
-          <Moon className="h-8 w-8 text-white/30 mt-1 flex-shrink-0" />
-        </div>
-        <div className="relative mt-5 flex items-center gap-2 bg-white/10 rounded-xl px-4 py-3">
-          <CalendarCheck className="h-4 w-4 text-white/50 flex-shrink-0" />
-          <span className="text-sm text-white/70">
-            Você está de <strong className="text-white">folga</strong> hoje. Aproveite!
-          </span>
-        </div>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 px-4 py-3 text-white shadow-xl flex items-center gap-3">
+        <Moon className="h-4 w-4 text-white/40 flex-shrink-0" />
+        <span className="text-xs font-medium uppercase tracking-wide text-white/50">{todayName}</span>
+        <span className="text-sm text-white/70 ml-1">
+          Você está de <strong className="text-white">folga</strong> hoje!
+        </span>
       </div>
     );
   }
@@ -145,66 +134,59 @@ export const TodayScheduleCard = () => {
   const cfg = statusConfig[status];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a639a] via-[#0d5a8a] to-[#083d61] p-6 text-white shadow-xl">
-      <div className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/5" />
-      <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-white/5" />
+    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0a639a] via-[#0d5a8a] to-[#083d61] px-5 py-4 text-white shadow-xl flex-1">
+      <div className="pointer-events-none absolute -top-6 -right-6 h-32 w-32 rounded-full bg-white/5" />
 
-      {/* Header row */}
-      <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-white/50 mb-1">{todayName}</p>
-          <p className="text-5xl font-bold tabular-nums leading-none">{timeString}</p>
-          <p className="text-sm text-white/60 mt-1">{dateString}</p>
-        </div>
+      {/* Linha principal: status + horários */}
+      <div className="relative flex flex-wrap items-center gap-x-5 gap-y-2">
 
-        <div className="flex items-center gap-1.5 self-start rounded-full bg-white/10 px-3 py-1.5">
-          <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
+        {/* Badge de status */}
+        <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1">
+          <span className={cn('h-2 w-2 rounded-full flex-shrink-0', cfg.dot)} />
           <span className={cn('text-xs font-medium', cfg.color)}>{cfg.label}</span>
         </div>
-      </div>
 
-      {/* Shift info pills */}
-      <div className="relative mt-5 grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2.5">
-          <Clock className="h-4 w-4 text-[#83cef6] flex-shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[10px] text-white/50 uppercase tracking-wide">Expediente</p>
-            <p className="text-sm font-semibold tabular-nums">
-              {formatTime(schedule.work_start_time)} – {formatTime(schedule.work_end_time)}
-            </p>
-          </div>
+        {/* Hora atual em destaque */}
+        <span className="text-2xl font-bold tabular-nums tracking-tight">{timeString}</span>
+
+        {/* Separador */}
+        <span className="text-white/20 text-sm hidden sm:inline">|</span>
+
+        {/* Expediente */}
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-[#83cef6] flex-shrink-0" />
+          <span className="text-[10px] text-white/50 uppercase tracking-wide">Expediente</span>
+          <span className="text-sm font-semibold tabular-nums ml-1">
+            {formatTime(schedule.work_start_time)} – {formatTime(schedule.work_end_time)}
+          </span>
         </div>
 
+        {/* Intervalo */}
         {schedule.break_start_time && schedule.break_end_time ? (
-          <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2.5">
-            <Coffee className="h-4 w-4 text-[#83cef6] flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[10px] text-white/50 uppercase tracking-wide">Intervalo</p>
-              <p className="text-sm font-semibold tabular-nums">
-                {formatTime(schedule.break_start_time)} – {formatTime(schedule.break_end_time)}
-              </p>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <Coffee className="h-3.5 w-3.5 text-[#83cef6] flex-shrink-0" />
+            <span className="text-[10px] text-white/50 uppercase tracking-wide">Intervalo</span>
+            <span className="text-sm font-semibold tabular-nums ml-1">
+              {formatTime(schedule.break_start_time)} – {formatTime(schedule.break_end_time)}
+            </span>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 opacity-50">
-            <Coffee className="h-4 w-4 text-white/40 flex-shrink-0" />
-            <div>
-              <p className="text-[10px] text-white/40 uppercase tracking-wide">Intervalo</p>
-              <p className="text-sm font-medium text-white/40">Não configurado</p>
-            </div>
-          </div>
-        )}
+        ) : null}
+
+        {/* Data à direita */}
+        <div className="ml-auto hidden md:block">
+          <span className="text-xs text-white/40">{todayName}, {dateString}</span>
+        </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Barra de progresso compacta */}
       {(status === 'working' || status === 'after') && (
-        <div className="relative mt-4">
-          <div className="flex justify-between text-[10px] text-white/40 mb-1.5">
+        <div className="relative mt-3">
+          <div className="flex justify-between text-[10px] text-white/40 mb-1">
             <span>{formatTime(schedule.work_start_time)}</span>
             <span className="text-white/60 font-medium">{progress}% concluído</span>
             <span>{formatTime(schedule.work_end_time)}</span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+          <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
             <div
               className={cn(
                 'h-full rounded-full transition-all duration-700',
