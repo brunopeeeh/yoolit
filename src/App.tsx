@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
+import Colaborador from "./pages/Colaborador";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Chat />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/colaborador" element={<Colaborador />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

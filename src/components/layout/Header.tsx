@@ -71,13 +71,13 @@ const Header = ({ user, profile, onUserChange, onProfileChange }: HeaderProps) =
         </div>
         
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {hasAdminAccess && (
+          {user && (
             <Button
               size="icon"
               variant="ghost"
               className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105"
               onClick={() => {
-                const adminUrl = isAgent && !isAdmin ? '/admin?tab=swap-requests' : '/admin?tab=dashboard';
+                const adminUrl = (isAdmin || isSupervisor) ? '/admin?tab=dashboard' : '/colaborador';
                 window.open(adminUrl, '_blank');
               }}
               title="Abrir Dashboard"

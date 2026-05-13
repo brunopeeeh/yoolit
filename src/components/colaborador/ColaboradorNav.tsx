@@ -4,13 +4,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
-  BarChart3,
   Calendar,
   RefreshCw,
-  Users,
-  Trophy,
-  ShoppingBag,
   Gift,
+  Trophy,
   Menu,
   ChevronLeft,
   ChevronRight,
@@ -20,38 +17,26 @@ interface NavItem {
   value: string;
   label: string;
   icon: React.ElementType;
-  adminOnly?: boolean;
 }
 
 const allNavItems: NavItem[] = [
-  { value: 'dashboard', label: 'Dashboard', icon: BarChart3, adminOnly: true },
-  { value: 'tasks', label: 'Tarefas', icon: Trophy, adminOnly: true },
-  { value: 'store', label: 'Loja', icon: ShoppingBag, adminOnly: true },
-  { value: 'swap-requests', label: 'Trocas', icon: RefreshCw, adminOnly: true },
-  { value: 'users', label: 'Agentes', icon: Users, adminOnly: true },
-  { value: 'shifts', label: 'Escalas', icon: Calendar, adminOnly: true },
-  { value: 'manage-tasks', label: 'Ger. Tarefas', icon: Trophy, adminOnly: true },
-  { value: 'manage-rewards', label: 'Recompensas', icon: Gift, adminOnly: true },
+  { value: 'schedule', label: 'Minha Escala', icon: Calendar },
+  { value: 'swap-requests', label: 'Trocas de Escalas', icon: RefreshCw },
+  { value: 'tasks', label: 'Tarefas', icon: Trophy },
+  { value: 'rewards', label: 'Recompensas', icon: Gift },
 ];
 
-interface AdminNavProps {
+interface ColaboradorNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  isAdmin: boolean;
-  isAgent: boolean;
 }
 
-export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavProps) {
+export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) {
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const visibleItems = allNavItems.filter((item) => {
-    if (item.adminOnly && isAgent && !isAdmin) return false;
-    return true;
-  });
-
-  const activeItem = visibleItems.find((i) => i.value === activeTab) || visibleItems[0];
+  const activeItem = allNavItems.find((i) => i.value === activeTab) || allNavItems[0];
   const ActiveIcon = activeItem.icon;
 
   // Mobile: bottom sheet drawer
@@ -61,7 +46,7 @@ export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavP
         <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="px-4 flex items-center justify-between h-12">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-semibold tracking-tight">Painel</h1>
+              <h1 className="text-sm font-semibold tracking-tight">Área do Colaborador</h1>
               <span className="text-muted-foreground/30 select-none">·</span>
               <p className="text-[11px] text-muted-foreground">
                 {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -85,8 +70,8 @@ export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavP
             <SheetHeader className="px-3 pb-3">
               <SheetTitle className="text-sm font-semibold text-left">Navegação</SheetTitle>
             </SheetHeader>
-            <nav className="grid grid-cols-2 gap-1.5">
-              {visibleItems.map((item) => {
+            <nav className="grid grid-cols-1 gap-1.5">
+              {allNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = item.value === activeTab;
                 return (
@@ -127,7 +112,7 @@ export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavP
       <div className="flex items-center justify-between px-3 py-3 border-b border-border/30">
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="text-xs font-semibold tracking-tight text-foreground">Painel</span>
+            <span className="text-xs font-semibold tracking-tight text-foreground">Colaborador</span>
             <span className="text-[10px] text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
             </span>
@@ -145,7 +130,7 @@ export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavP
       </div>
 
       <nav className="flex-1 flex flex-col gap-0.5 px-2 py-2 overflow-y-auto">
-        {visibleItems.map((item) => {
+        {allNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.value === activeTab;
           return (
@@ -172,9 +157,4 @@ export function AdminNav({ activeTab, onTabChange, isAdmin, isAgent }: AdminNavP
       </nav>
     </aside>
   );
-}
-
-export function useAdminNavWidth() {
-  // Returns CSS class for main content margin
-  return { collapsed: 'ml-[52px]', expanded: 'ml-[200px]' };
 }
