@@ -175,16 +175,7 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
 
   const handleSaveSchedules = async () => {
     try {
-      // Delete existing schedules for this user
-      const { error: deleteError } = await supabase
-        .from('agent_schedules')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (deleteError) throw deleteError;
-
-      // Insert new schedules
-      const schedulesToInsert = Object.entries(schedules).map(([day, schedule]) => ({
+      const schedulesToUpsert = Object.entries(schedules).map(([day, schedule]) => ({
         user_id: user.id,
         day_of_week: day,
         work_start_time: schedule.workStart || null,
@@ -193,12 +184,12 @@ export const EditAgentDialog = ({ open, onOpenChange, user, onSuccess }: EditAge
         break_end_time: schedule.breakEnd || null,
       }));
 
-      if (schedulesToInsert.length > 0) {
-        const { error: insertError } = await supabase
+      if (schedulesToUpsert.length > 0) {
+        const { error: upsertError } = await supabase
           .from('agent_schedules')
-          .insert(schedulesToInsert);
+          .upsert(schedulesToUpsert, { onConflict: 'user_id,day_of_week' });
 
-        if (insertError) throw insertError;
+        if (upsertError) throw upsertError;
       }
     } catch (error) {
       console.error('Error saving schedules:', error);

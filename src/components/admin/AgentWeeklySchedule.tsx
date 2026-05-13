@@ -158,18 +158,11 @@ export const AgentWeeklySchedule = () => {
             break_end_time: day.break_end_time,
           };
 
-          if (day.schedule_id) {
-            const { error } = await supabase
-              .from('agent_schedules')
-              .update(scheduleData)
-              .eq('id', day.schedule_id);
-            if (error) throw error;
-          } else {
-            const { error } = await supabase
-              .from('agent_schedules')
-              .insert(scheduleData);
-            if (error) throw error;
-          }
+          const { error } = await supabase
+            .from('agent_schedules')
+            .upsert(scheduleData, { onConflict: 'user_id,day_of_week' });
+          
+          if (error) throw error;
         } else if (day.schedule_id) {
           const { error } = await supabase
             .from('agent_schedules')
