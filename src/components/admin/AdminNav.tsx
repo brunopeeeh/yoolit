@@ -14,6 +14,7 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  Globe,
 } from 'lucide-react';
 
 interface NavItem {
@@ -25,6 +26,7 @@ interface NavItem {
 
 const allNavItems: NavItem[] = [
   { value: 'dashboard', label: 'Dashboard', icon: BarChart3, adminOnly: true },
+  { value: 'global-schedule', label: 'Escala Global', icon: Globe, adminOnly: true },
   { value: 'tasks', label: 'Tarefas', icon: Trophy, adminOnly: true },
   { value: 'store', label: 'Loja', icon: ShoppingBag, adminOnly: true },
   { value: 'swap-requests', label: 'Trocas', icon: RefreshCw, adminOnly: true },

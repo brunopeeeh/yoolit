@@ -15,6 +15,7 @@ import { TasksManagement } from '@/components/gamification/TasksManagement';
 import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { RewardsStore } from '@/components/gamification/RewardsStore';
 import { RewardsManagement } from '@/components/gamification/RewardsManagement';
+import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
 import type { User } from '@supabase/supabase-js';
 import { AdminNav } from '@/components/admin/AdminNav';
 
@@ -129,6 +130,8 @@ const Admin = () => {
         return <RewardsStore />;
       case 'swap-requests':
         return <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />;
+      case 'global-schedule':
+        return (!isAgent || isAdmin) ? <GlobalScheduleView /> : null;
       case 'users':
         return (!isAgent || isAdmin) ? <UserManagement /> : null;
       case 'shifts':

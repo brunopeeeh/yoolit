@@ -73,7 +73,8 @@ export const GlobalScheduleView = () => {
       const { data: scheduleData, error: scheduleError } = await supabase
         .from('agent_schedules')
         .select('*')
-        .eq('day_of_week', selectedDay);
+        .eq('day_of_week', selectedDay)
+        .order('work_start_time', { ascending: true, nullsFirst: false });
 
       if (scheduleError) throw scheduleError;
 
@@ -84,14 +85,14 @@ export const GlobalScheduleView = () => {
         // 3. Busca o nome desses perfis
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, name, full_name')
+          .select('id, name')
           .in('id', userIds);
 
         if (profilesError) throw profilesError;
 
         const profilesMap: Record<string, string> = {};
         profilesData?.forEach(p => {
-          profilesMap[p.id] = p.name || p.full_name || 'Desconhecido';
+          profilesMap[p.id] = p.name || 'Desconhecido';
         });
 
         setProfiles(profilesMap);
@@ -100,9 +101,9 @@ export const GlobalScheduleView = () => {
       }
 
       setSchedules(scheduleData || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao buscar escala global:', error);
-      toast.error('Erro ao carregar a escala global.');
+      toast.error(error?.message || 'Erro ao carregar a escala global.');
     } finally {
       setIsLoading(false);
     }
