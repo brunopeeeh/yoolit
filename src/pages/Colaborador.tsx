@@ -21,7 +21,7 @@ const Colaborador = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { isAgent, isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
-  const activeTab = searchParams.get('tab') || 'schedule';
+  const activeTab = searchParams.get('tab') || 'inicio';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
 
@@ -94,8 +94,31 @@ const Colaborador = () => {
 
   if (!user) return null;
 
+  function getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+
+  const firstName = profile?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Colaborador';
+
   const renderContent = () => {
     switch (activeTab) {
+      case 'inicio':
+        return (
+          <div className="space-y-2">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-3xl font-bold tracking-tight">
+                {getGreeting()}, {firstName}!
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Aqui está um resumo do seu dia de trabalho.
+              </p>
+            </div>
+            <TodayScheduleCard />
+          </div>
+        );
       case 'schedule':
         return <AgentScheduleView />;
       case 'global-schedule':
@@ -107,7 +130,7 @@ const Colaborador = () => {
       case 'rewards':
         return <RewardsStore />;
       default:
-        return <AgentScheduleView />;
+        return null;
     }
   };
 
@@ -130,17 +153,6 @@ const Colaborador = () => {
         !isMobile && (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
       )}>
         <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight">
-              Bem-vindo(a), {profile?.name || user.email?.split('@')[0] || 'Colaborador'}!
-            </h1>
-            <p className="text-muted-foreground">
-              Acompanhe sua escala, realize trocas e confira suas tarefas e recompensas.
-            </p>
-          </div>
-
-          <TodayScheduleCard />
-
           {renderContent()}
         </div>
       </main>

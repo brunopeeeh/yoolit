@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Table as TableIcon,
+  Home,
 } from 'lucide-react';
 
 interface NavItem {
@@ -21,6 +22,7 @@ interface NavItem {
 }
 
 const allNavItems: NavItem[] = [
+  { value: 'inicio', label: 'Início', icon: Home },
   { value: 'schedule', label: 'Minha Escala', icon: Calendar },
   { value: 'global-schedule', label: 'Escala Global', icon: TableIcon },
   { value: 'swap-requests', label: 'Trocas de Escalas', icon: RefreshCw },
