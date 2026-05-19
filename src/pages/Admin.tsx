@@ -16,6 +16,7 @@ import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { RewardsStore } from '@/components/gamification/RewardsStore';
 import { RewardsManagement } from '@/components/gamification/RewardsManagement';
 import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
+import { SystemUpdates } from '@/components/colaborador/SystemUpdates';
 import type { User } from '@supabase/supabase-js';
 import { AdminNav } from '@/components/admin/AdminNav';
 
@@ -130,6 +131,8 @@ const Admin = () => {
         return <RewardsStore />;
       case 'swap-requests':
         return <ShiftSwapRequests isAgentView={isAgent && !isAdmin} />;
+      case 'updates':
+        return <SystemUpdates />;
       case 'global-schedule':
         return (!isAgent || isAdmin) ? <GlobalScheduleView /> : null;
       case 'users':
@@ -162,10 +165,15 @@ const Admin = () => {
       />
 
       <main className={cn(
-        'py-6 px-4 page-enter transition-all duration-300',
+        'py-6 page-enter transition-all duration-300',
+        activeTab === 'global-schedule' ? 'px-2 sm:px-3' : 'px-4',
         !isMobile && (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
       )}>
-        <div className="max-w-7xl mx-auto">
+        <div
+          className={cn(
+            activeTab === 'global-schedule' ? 'w-full' : 'max-w-7xl mx-auto'
+          )}
+        >
           {renderContent()}
         </div>
       </main>

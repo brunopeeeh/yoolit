@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2 } from 'lucide-react';
+import { generateUUID } from '@/lib/utils';
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -36,7 +37,7 @@ export const CreateTaskDialog = ({ open, onOpenChange, onSuccess }: CreateTaskDi
   const { toast } = useToast();
 
   const addChecklistItem = () => {
-    setChecklistItems([...checklistItems, { id: crypto.randomUUID(), description: '', points: 0 }]);
+    setChecklistItems([...checklistItems, { id: generateUUID(), description: '', points: 0 }]);
   };
 
   const removeChecklistItem = (id: string) => {

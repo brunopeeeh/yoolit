@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Table as TableIcon,
   Home,
+  Zap,
 } from 'lucide-react';
 
 interface NavItem {
@@ -22,26 +23,46 @@ interface NavItem {
 }
 
 const allNavItems: NavItem[] = [
-  { value: 'inicio', label: 'Início', icon: Home },
-  { value: 'schedule', label: 'Minha Escala', icon: Calendar },
-  { value: 'global-schedule', label: 'Escala Global', icon: TableIcon },
-  { value: 'swap-requests', label: 'Trocas de Escalas', icon: RefreshCw },
-  { value: 'tasks', label: 'Tarefas', icon: Trophy },
-  { value: 'rewards', label: 'Recompensas', icon: Gift },
+  { value: 'inicio',          label: 'Início',           icon: Home },
+  { value: 'updates',         label: 'Atualizações',     icon: Zap },
+  { value: 'schedule',        label: 'Minha Escala',     icon: Calendar },
+  { value: 'global-schedule', label: 'Escala Global',    icon: TableIcon },
+  { value: 'swap-requests',   label: 'Trocas de Escalas',icon: RefreshCw },
+  { value: 'tasks',           label: 'Tarefas',          icon: Trophy },
+  { value: 'rewards',         label: 'Recompensas',      icon: Gift },
 ];
 
 interface ColaboradorNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  badges?: Partial<Record<string, number>>;
 }
 
-export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) {
+function NavBadge({ count, collapsed }: { count: number; collapsed?: boolean }) {
+  if (!count) return null;
+  const label = count > 99 ? '99+' : String(count);
+  return (
+    <span
+      className={cn(
+        'flex items-center justify-center rounded-full bg-red-500 font-bold text-white leading-none',
+        collapsed
+          ? 'absolute -top-0.5 -right-0.5 h-4 w-4 text-[9px]'
+          : 'ml-auto h-5 min-w-5 px-1 text-[10px]'
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+export function ColaboradorNav({ activeTab, onTabChange, badges = {} }: ColaboradorNavProps) {
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const activeItem = allNavItems.find((i) => i.value === activeTab) || allNavItems[0];
   const ActiveIcon = activeItem.icon;
+  const activeBadge = badges[activeTab] ?? 0;
 
   // Mobile: bottom sheet drawer
   if (isMobile) {
@@ -59,11 +80,16 @@ export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) 
             <Button
               variant="outline"
               size="sm"
-              className="h-8 gap-2 rounded-lg text-xs font-medium border-border/60"
+              className="relative h-8 gap-2 rounded-lg text-xs font-medium border-border/60"
               onClick={() => setSheetOpen(true)}
             >
               <ActiveIcon className="h-3.5 w-3.5 text-primary" />
               {activeItem.label}
+              {activeBadge > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none">
+                  {activeBadge > 99 ? '99+' : activeBadge}
+                </span>
+              )}
               <Menu className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
           </div>
@@ -78,6 +104,7 @@ export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) 
               {allNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = item.value === activeTab;
+                const badgeCount = badges[item.value] ?? 0;
                 return (
                   <button
                     key={item.value}
@@ -94,7 +121,14 @@ export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) 
                   >
                     <Icon className={cn('h-4 w-4 flex-shrink-0', isActive && 'text-primary')} />
                     <span className="truncate">{item.label}</span>
-                    {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5 text-primary/60" />}
+                    {badgeCount > 0 && (
+                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none">
+                        {badgeCount > 99 ? '99+' : badgeCount}
+                      </span>
+                    )}
+                    {isActive && !badgeCount && (
+                      <ChevronRight className="ml-auto h-3.5 w-3.5 text-primary/60" />
+                    )}
                   </button>
                 );
               })}
@@ -137,6 +171,7 @@ export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) 
         {allNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.value === activeTab;
+          const badgeCount = badges[item.value] ?? 0;
           return (
             <button
               key={item.value}
@@ -150,8 +185,20 @@ export function ColaboradorNav({ activeTab, onTabChange }: ColaboradorNavProps) 
                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
               )}
             >
-              <Icon className="h-4 w-4 flex-shrink-0" />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <span className="relative flex-shrink-0">
+                <Icon className="h-4 w-4" />
+                {collapsed && badgeCount > 0 && (
+                  <NavBadge count={badgeCount} collapsed />
+                )}
+              </span>
+
+              {!collapsed && (
+                <>
+                  <span className="truncate">{item.label}</span>
+                  {badgeCount > 0 && <NavBadge count={badgeCount} />}
+                </>
+              )}
+
               {isActive && !collapsed && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
               )}

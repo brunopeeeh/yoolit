@@ -9,6 +9,7 @@ import { N8NClient } from "@/lib/n8n";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import packageJson from "../../../package.json";
+import { generateUUID } from "@/lib/utils";
 
 interface ChatWidgetProps {
   user?: any;
@@ -24,7 +25,7 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
   // Inicializar sessionId
   useEffect(() => {
     if (!sessionId) {
-      setSessionId(crypto.randomUUID());
+      setSessionId(generateUUID());
     }
   }, [sessionId]);
 
@@ -128,14 +129,14 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
   const handleClearChat = () => {
     setMessages([]);
     // Gerar novo sessionId ao limpar o chat
-    setSessionId(crypto.randomUUID());
+    setSessionId(generateUUID());
   };
 
   const handleCommand = (command: string, args?: string[]) => {
     switch (command.toLowerCase()) {
       case 'version':
         const versionMessage = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           content: `Versão do projeto: ${packageJson.version}`,
           sender: 'system',
           timestamp: new Date().toISOString(),
@@ -149,7 +150,7 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
         
       case 'help':
         const helpMessage = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           content: `Comandos disponíveis:
 /version - Exibe a versão do projeto
 /clear - Limpa o histórico de mensagens
@@ -163,7 +164,7 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
         
       case 'status':
         const statusMessage = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           content: `Status do sistema:
 - Usuário logado: ${isLoggedIn ? 'Sim' : 'Não'}
 - Session ID: ${sessionId}
@@ -177,7 +178,7 @@ const ChatWidget = ({ user: propUser, profile }: ChatWidgetProps) => {
          
        default:
          const unknownMessage = {
-           id: crypto.randomUUID(),
+           id: generateUUID(),
            content: `Comando desconhecido: /${command}. Digite /help para ver os comandos disponíveis.`,
            sender: 'system',
            timestamp: new Date().toISOString(),

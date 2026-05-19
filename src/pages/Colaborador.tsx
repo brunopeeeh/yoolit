@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRoles } from '@/hooks/useRoles';
 import Header from '@/components/layout/Header';
@@ -12,7 +12,19 @@ import { ColaboradorNav } from '@/components/colaborador/ColaboradorNav';
 import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
 import { TodayScheduleCard } from '@/components/colaborador/TodayScheduleCard';
+import { SystemUpdates } from '@/components/colaborador/SystemUpdates';
 import type { User } from '@supabase/supabase-js';
+
+const LS_KEY = 'oraculo_updates_read';
+
+function getReadIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
 
 const Colaborador = () => {
   const navigate = useNavigate();
@@ -23,6 +35,7 @@ const Colaborador = () => {
   const { isAgent, isAdmin, isLoading: rolesLoading } = useRoles(user?.id);
   const activeTab = searchParams.get('tab') || 'inicio';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [unreadUpdatesCount, setUnreadUpdatesCount] = useState(0);
   const isMobile = useIsMobile();
 
   const handleTabChange = (newTab: string) => {
@@ -38,6 +51,13 @@ const Colaborador = () => {
     getSession();
   }, []);
 
+  const computeUnreadCount = useCallback(async () => {
+    const { data } = await supabase.from('system_updates').select('id');
+    if (!data) return;
+    const readSet = getReadIds();
+    setUnreadUpdatesCount(data.filter(u => !readSet.has(u.id)).length);
+  }, []);
+
   useEffect(() => {
     if (user) {
       const fetchProfile = async () => {
@@ -49,8 +69,17 @@ const Colaborador = () => {
         setProfile(data);
       };
       fetchProfile();
+
+      computeUnreadCount();
+
+      const channel = supabase
+        .channel('updates-badge-count')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_updates' }, computeUnreadCount)
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
     }
-  }, [user]);
+  }, [user, computeUnreadCount]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -107,24 +136,45 @@ const Colaborador = () => {
     switch (activeTab) {
       case 'inicio':
         return (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              {/* Saudação */}
-              <div className="flex flex-col gap-1 sm:w-56 flex-shrink-0">
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {getGreeting()}, {firstName}!
-                </h1>
-                <p className="text-muted-foreground text-sm">
-                  Aqui está um resumo do seu dia de trabalho.
-                </p>
+          <div className="space-y-8">
+
+            {/* 1. Card de Expediente — destaque total */}
+            <TodayScheduleCard />
+
+            {/* 2. Saudação personalizada */}
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight">
+                {getGreeting()}, {firstName}! 👋
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Aqui está um resumo do seu dia de trabalho.
+              </p>
+            </div>
+
+            {/* 3. Resumo Diário — espaço reservado para métricas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Placeholder: futuros cards de métricas virão aqui */}
+              <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 flex flex-col items-center justify-center gap-2 text-center min-h-[120px]">
+                <span className="text-2xl">📊</span>
+                <p className="text-sm font-medium text-muted-foreground">Atendimentos do Dia</p>
+                <p className="text-xs text-muted-foreground/60">Em breve</p>
               </div>
-              {/* Card compacto ocupa o resto da linha */}
-              <div className="flex-1 w-full">
-                <TodayScheduleCard />
+              <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 flex flex-col items-center justify-center gap-2 text-center min-h-[120px]">
+                <span className="text-2xl">✅</span>
+                <p className="text-sm font-medium text-muted-foreground">Chamados Finalizados</p>
+                <p className="text-xs text-muted-foreground/60">Em breve</p>
+              </div>
+              <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 flex flex-col items-center justify-center gap-2 text-center min-h-[120px] sm:col-span-2 lg:col-span-1">
+                <span className="text-2xl">⏱️</span>
+                <p className="text-sm font-medium text-muted-foreground">Tempo Médio de Resposta</p>
+                <p className="text-xs text-muted-foreground/60">Em breve</p>
               </div>
             </div>
+
           </div>
         );
+      case 'updates':
+        return <SystemUpdates onReadAll={() => setUnreadUpdatesCount(0)} />;
       case 'schedule':
         return <AgentScheduleView />;
       case 'global-schedule':
@@ -152,13 +202,19 @@ const Colaborador = () => {
       <ColaboradorNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        badges={{ updates: unreadUpdatesCount }}
       />
 
       <main className={cn(
-        'py-6 px-4 page-enter transition-all duration-300',
+        'py-6 page-enter transition-all duration-300',
+        activeTab === 'global-schedule' ? 'px-2 sm:px-3' : 'px-4',
         !isMobile && (sidebarCollapsed ? 'ml-[52px]' : 'ml-[200px]')
       )}>
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div
+          className={cn(
+            activeTab === 'global-schedule' ? 'w-full' : 'max-w-7xl mx-auto space-y-6'
+          )}
+        >
           {renderContent()}
         </div>
       </main>

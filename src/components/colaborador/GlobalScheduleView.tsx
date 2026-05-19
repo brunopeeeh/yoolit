@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,6 +50,13 @@ const generateTimeBlocks = () => {
 
 const TIME_BLOCKS = generateTimeBlocks();
 
+/** Largura fixa por coluna de agente (mesmo padrão visual de qua/qui/sex) */
+const TIME_COL_PX = 44;
+const TOTAL_COL_PX = 52;
+const AGENT_COL_PX = 104;
+
+const DAY_KEYS = DAYS_OF_WEEK.map((d) => d.value);
+
 export const GlobalScheduleView = () => {
   // Pega o dia atual da semana (0 = domingo, 1 = segunda...)
   const todayIndex = new Date().getDay();
@@ -60,11 +67,46 @@ export const GlobalScheduleView = () => {
   const [selectedDay, setSelectedDay] = useState<string>(initialDay);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [maxAgentColumns, setMaxAgentColumns] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMaxAgentColumns();
+  }, []);
 
   useEffect(() => {
     fetchGlobalSchedule();
   }, [selectedDay]);
+
+  const fetchMaxAgentColumns = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_schedules')
+        .select('user_id, day_of_week')
+        .in('day_of_week', DAY_KEYS);
+
+      if (error) throw error;
+
+      const countByDay: Record<string, Set<string>> = {};
+      DAY_KEYS.forEach((day) => {
+        countByDay[day] = new Set();
+      });
+
+      data?.forEach((row) => {
+        if (row.day_of_week && row.user_id) {
+          countByDay[row.day_of_week]?.add(row.user_id);
+        }
+      });
+
+      const max = Math.max(
+        1,
+        ...DAY_KEYS.map((day) => countByDay[day]?.size ?? 0)
+      );
+      setMaxAgentColumns(max);
+    } catch (error) {
+      console.error('Erro ao calcular colunas da escala:', error);
+    }
+  };
 
   const fetchGlobalSchedule = async () => {
     setIsLoading(true);
@@ -144,8 +186,54 @@ export const GlobalScheduleView = () => {
     return blockMin >= breakStartMin || blockMin < breakEndMin;
   };
 
+  /**
+   * Ordem das colunas (como na planilha):
+   * 1) início do expediente
+   * 2) mesmo início → quem entra em pausa antes fica à esquerda (ex.: Sofia 11h antes de Lucas 12h)
+   * 3) desempate por fim do expediente e nome
+   */
+  const agentSchedules = useMemo(() => {
+    const byUser = new Map<string, (typeof schedules)[0]>();
+    schedules.forEach((s) => {
+      if (!byUser.has(s.user_id)) byUser.set(s.user_id, s);
+    });
+    return [...byUser.values()].sort((a, b) => {
+      const startA = timeToMinutes(a.work_start_time || '23:59');
+      const startB = timeToMinutes(b.work_start_time || '23:59');
+      if (startA !== startB) return startA - startB;
+
+      const breakA = a.break_start_time
+        ? timeToMinutes(a.break_start_time)
+        : Number.MAX_SAFE_INTEGER;
+      const breakB = b.break_start_time
+        ? timeToMinutes(b.break_start_time)
+        : Number.MAX_SAFE_INTEGER;
+      if (breakA !== breakB) return breakA - breakB;
+
+      const endA = timeToMinutes(a.work_end_time || '00:00');
+      const endB = timeToMinutes(b.work_end_time || '00:00');
+      if (endA !== endB) return endA - endB;
+
+      const nameA = (profiles[a.user_id] || '').toLocaleLowerCase('pt-BR');
+      const nameB = (profiles[b.user_id] || '').toLocaleLowerCase('pt-BR');
+      return nameA.localeCompare(nameB, 'pt-BR');
+    });
+  }, [schedules, profiles]);
+
+  /** Colunas vazias até o máximo da semana — evita esticar nomes em seg/ter/sáb/dom */
+  const tableColumns = useMemo(() => {
+    const padding = Math.max(0, maxAgentColumns - agentSchedules.length);
+    return [
+      ...agentSchedules.map((schedule) => ({ type: 'agent' as const, schedule })),
+      ...Array.from({ length: padding }, () => ({ type: 'empty' as const })),
+    ];
+  }, [agentSchedules, maxAgentColumns]);
+
+  const tableWidthPx =
+    TIME_COL_PX * 2 + maxAgentColumns * AGENT_COL_PX + TOTAL_COL_PX;
+
   return (
-    <Card className="w-full">
+    <Card className="w-full max-w-none border-border/60 shadow-sm">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -181,8 +269,19 @@ export const GlobalScheduleView = () => {
             Nenhum colaborador possui escala configurada para {DAYS_OF_WEEK.find(d => d.value === selectedDay)?.label.toLowerCase()}.
           </div>
         ) : (
-          <div className="overflow-x-auto border rounded-lg shadow-sm">
-            <table className="w-full border-collapse text-sm min-w-max">
+          <div className="w-full overflow-x-auto border rounded-lg shadow-sm">
+            <table
+              className="border-collapse text-sm table-fixed"
+              style={{ width: `max(100%, ${tableWidthPx}px)` }}
+            >
+              <colgroup>
+                <col style={{ width: TIME_COL_PX }} />
+                <col style={{ width: TIME_COL_PX }} />
+                {Array.from({ length: maxAgentColumns }).map((_, i) => (
+                  <col key={i} style={{ width: AGENT_COL_PX }} />
+                ))}
+                <col style={{ width: TOTAL_COL_PX }} />
+              </colgroup>
               <thead>
                 <tr className="bg-muted/50">
                   <th className="border p-2 font-semibold text-left sticky left-0 z-20 bg-muted" colSpan={2}>
@@ -190,12 +289,24 @@ export const GlobalScheduleView = () => {
                       {DAYS_OF_WEEK.find(d => d.value === selectedDay)?.label}
                     </div>
                   </th>
-                  {schedules.map((schedule) => (
-                    <th key={schedule.user_id} className="border p-2 font-medium text-center min-w-[80px]">
-                      {profiles[schedule.user_id]?.split(' ')[0] || 'Desconhecido'}
+                  {tableColumns.map((col, index) => (
+                    <th
+                      key={col.type === 'agent' ? col.schedule.user_id : `empty-${index}`}
+                      className={cn(
+                        'border px-2 py-2 font-medium text-center text-xs leading-tight',
+                        col.type === 'empty' && 'bg-muted/20'
+                      )}
+                      style={{ width: AGENT_COL_PX, maxWidth: AGENT_COL_PX }}
+                      title={col.type === 'agent' ? profiles[col.schedule.user_id] : undefined}
+                    >
+                      {col.type === 'agent' ? (
+                        <span className="block truncate">
+                          {profiles[col.schedule.user_id] || 'Desconhecido'}
+                        </span>
+                      ) : null}
                     </th>
                   ))}
-                  <th className="border p-2 font-bold text-center text-red-600 min-w-[60px] bg-muted/80">
+                  <th className="border p-2 font-bold text-center text-red-600 bg-muted/80">
                     Total
                   </th>
                 </tr>
@@ -209,29 +320,39 @@ export const GlobalScheduleView = () => {
                       <td className="border p-1 text-center text-xs text-muted-foreground sticky left-0 z-10 bg-background/95 font-medium border-r-0">
                         {block.start}
                       </td>
-                      <td className="border p-1 text-center text-xs text-muted-foreground sticky left-[40px] z-10 bg-background/95 font-medium border-l-0">
+                      <td className="border p-1 text-center text-xs text-muted-foreground sticky left-11 z-10 bg-background/95 font-medium border-l-0">
                         {block.end}
                       </td>
-                      
-                      {schedules.map((schedule) => {
+
+                      {tableColumns.map((col, index) => {
+                        if (col.type === 'empty') {
+                          return (
+                            <td
+                              key={`empty-${block.start}-${index}`}
+                              className="border bg-muted/10"
+                            />
+                          );
+                        }
+
+                        const schedule = col.schedule;
                         const inShift = isTimeInShift(block.start, schedule);
                         const inBreak = isTimeInBreak(block.start, schedule);
-                        
-                        let cellClass = "";
-                        let cellContent = "";
+
+                        let cellClass = '';
+                        let cellContent = '';
 
                         if (inBreak) {
-                          cellClass = "bg-[#f8b890] border-[#e8a880]"; // Laranja/Coral (Intervalo)
+                          cellClass = 'bg-[#f8b890] border-[#e8a880]';
                         } else if (inShift) {
-                          cellClass = "bg-[#c6dfc0] border-[#b6cfb0] font-medium text-[#2d5a27]"; // Verde (Trabalhando)
-                          cellContent = "1";
+                          cellClass = 'bg-[#c6dfc0] border-[#b6cfb0] font-medium text-[#2d5a27]';
+                          cellContent = '1';
                           totalWorking++;
                         }
 
                         return (
-                          <td 
-                            key={`${block.start}-${schedule.user_id}`} 
-                            className={cn("border p-1 text-center", cellClass)}
+                          <td
+                            key={`${block.start}-${schedule.user_id}`}
+                            className={cn('border p-1 text-center', cellClass)}
                           >
                             {cellContent}
                           </td>
