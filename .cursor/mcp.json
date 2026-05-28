@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+      "n8n-mcp": {
+        "command": "npx",
+        "args": ["n8n-mcp"],
+        "env": {
+          "MCP_MODE": "stdio",
+          "LOG_LEVEL": "error",
+          "DISABLE_CONSOLE_OUTPUT": "true",
+          "N8N_API_URL": "https://assign.yooga.com.br/mcp-server/http",
+          "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNmE4ZGVlZi0xMjM3LTQ5YjEtODZkZi1iYmQ1Mzc2ZTFkM2YiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjRmYTBjMzZjLWE0NDktNDJmMC1hMGZjLTk3MTJhMDY2ZjE2YiIsImlhdCI6MTc3ODg1ODA3MH0.K8DSXSRcJuR5HwtkBis8iF03neHbVqi3qpBAc82iqJ0"
+        }
+      }
+    }
+  }
+

@@ -14,6 +14,7 @@ import {
   Table as TableIcon,
   Home,
   Zap,
+  LayoutGrid,
 } from 'lucide-react';
 
 interface NavItem {
@@ -24,6 +25,7 @@ interface NavItem {
 
 const allNavItems: NavItem[] = [
   { value: 'inicio',          label: 'Início',           icon: Home },
+  { value: 'hub',             label: 'Hub Interno',      icon: LayoutGrid },
   { value: 'updates',         label: 'Atualizações',     icon: Zap },
   { value: 'schedule',        label: 'Minha Escala',     icon: Calendar },
   { value: 'global-schedule', label: 'Escala Global',    icon: TableIcon },

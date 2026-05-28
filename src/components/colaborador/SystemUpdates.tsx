@@ -150,19 +150,19 @@ export function SystemUpdates({ onReadAll }: SystemUpdatesProps) {
     switch (category?.toLowerCase()) {
       case 'feature':
         return (
-          <Badge className="bg-primary hover:bg-primary/90 gap-1">
+          <Badge className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20 shadow-none dark:bg-emerald-500/20 dark:text-emerald-400 gap-1">
             <Zap className="w-3 h-3" /> Nova Funcionalidade
           </Badge>
         );
       case 'bugfix':
         return (
-          <Badge variant="destructive" className="gap-1">
+          <Badge className="bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 shadow-none dark:bg-red-500/20 dark:text-red-400 gap-1">
             <Bug className="w-3 h-3" /> Correção
           </Badge>
         );
       default:
         return (
-          <Badge variant="secondary" className="gap-1">
+          <Badge className="bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 border border-sky-500/20 shadow-none dark:bg-sky-500/20 dark:text-sky-400 gap-1">
             <Info className="w-3 h-3" /> Aviso
           </Badge>
         );
@@ -275,14 +275,14 @@ export function SystemUpdates({ onReadAll }: SystemUpdatesProps) {
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all',
                 isActive
-                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  ? 'border-primary bg-primary/10 text-primary shadow-sm font-semibold'
                   : 'border-border bg-background text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground'
               )}
             >
               {label}
               <span className={cn(
                 'rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none',
-                isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
               )}>
                 {count}
               </span>
@@ -301,7 +301,7 @@ export function SystemUpdates({ onReadAll }: SystemUpdatesProps) {
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all',
             showUnreadOnly
-              ? 'border-red-500 bg-red-500 text-white shadow-sm'
+              ? 'border-red-500 bg-red-500/10 text-red-600 shadow-sm font-semibold'
               : 'border-border bg-background text-muted-foreground hover:border-red-400 hover:text-red-500'
           )}
         >
@@ -309,7 +309,7 @@ export function SystemUpdates({ onReadAll }: SystemUpdatesProps) {
           {unreadIds.size > 0 && (
             <span className={cn(
               'rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none',
-              showUnreadOnly ? 'bg-white/20 text-white' : 'bg-red-100 text-red-600'
+              showUnreadOnly ? 'bg-red-500/20 text-red-700' : 'bg-red-100 text-red-600'
             )}>
               {unreadIds.size}
             </span>

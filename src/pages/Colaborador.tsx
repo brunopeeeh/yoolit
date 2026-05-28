@@ -13,6 +13,7 @@ import { AgentTasks } from '@/components/gamification/AgentTasks';
 import { GlobalScheduleView } from '@/components/colaborador/GlobalScheduleView';
 import { TodayScheduleCard } from '@/components/colaborador/TodayScheduleCard';
 import { SystemUpdates } from '@/components/colaborador/SystemUpdates';
+import { HubInterno } from '@/components/colaborador/HubInterno';
 import type { User } from '@supabase/supabase-js';
 
 const LS_KEY = 'oraculo_updates_read';
@@ -173,6 +174,8 @@ const Colaborador = () => {
 
           </div>
         );
+      case 'hub':
+        return <HubInterno />;
       case 'updates':
         return <SystemUpdates onReadAll={() => setUnreadUpdatesCount(0)} />;
       case 'schedule':
