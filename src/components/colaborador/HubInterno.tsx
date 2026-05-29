@@ -28,7 +28,7 @@ const HUB_LINKS = {
   holiday: {
     title: 'Votação de Folga (Feriados)',
     description: 'Participe da enquete de escala para feriados e vote sobre as preferências de folga da equipe.',
-    url: 'https://forms.gle/placeholder-feriado',
+    url: 'https://docs.google.com/forms/d/11GQ251GFhUiGA9sANHoqOUBpDrRIFpWfPzRyCnigbuM/edit?ts=6a19d13e',
     icon: Vote,
     color: 'from-blue-500/20 to-sky-500/20 hover:from-blue-500/30 hover:to-sky-500/30 border-sky-500/30',
     iconColor: 'text-sky-500',
